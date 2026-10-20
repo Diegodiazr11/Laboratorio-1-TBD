@@ -110,7 +110,7 @@ export default function Register() {
             <div className="relative">
               <input 
                 type={showPassword ? 'text' : 'password'} 
-                placeholder="••••••••"
+                placeholder={showPassword ? 'Contrasena.12' : "••••••••" }
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 required 
