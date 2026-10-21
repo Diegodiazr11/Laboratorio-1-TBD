@@ -20,5 +20,5 @@ public class Alojamiento {
     private Integer capacidadMax;
     private BigDecimal precioBaseNoche;
     private Integer estadiaMinima;
-    private String estadoPublicacion;
+    private String estadoPublicacion; // PENDIENTE, PUBLICADO, SUSPENDIDO
 }

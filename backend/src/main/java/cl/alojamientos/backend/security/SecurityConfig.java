@@ -50,6 +50,9 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
 
+                        .requestMatchers(HttpMethod.GET, "/api/ciudades/**", "/api/tipos-alojamiento/**").permitAll()
+                        .requestMatchers("/api/ciudades/**", "/api/tipos-alojamiento/**").hasRole("ADMINISTRADOR")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
