@@ -30,6 +30,7 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO request){
         try{
             AuthResponseDTO response = authUserService.login(request);
