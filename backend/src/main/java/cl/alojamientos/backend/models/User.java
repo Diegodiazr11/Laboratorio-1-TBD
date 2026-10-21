@@ -14,5 +14,5 @@ public class User {
     private String email;
     private String passwordHash;
     private String rol;
-    private boolean estado;
+    private String estado;
 }
