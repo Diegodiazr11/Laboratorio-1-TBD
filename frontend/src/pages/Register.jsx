@@ -7,7 +7,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('HUESPED');
+  const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -88,7 +88,6 @@ export default function Register() {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
               Correo Electrónico:
@@ -196,7 +195,7 @@ export default function Register() {
 
           <button
             type="submit"
-            disabled={loading || (password.length > 0 && !isPasswordValid)}
+            disabled={loading || !isPasswordValid || !email?.trim() || !name?.trim() || !role?.trim()}
             className="w-full bg-rose-600 hover:bg-rose-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-lg shadow-xs transition-colors cursor-pointer text-sm mt-2"
           >
             {loading ? 'Registrando...' : 'Registrarse'}

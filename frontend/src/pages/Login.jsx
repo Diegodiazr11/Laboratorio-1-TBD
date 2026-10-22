@@ -20,7 +20,7 @@ export default function Login() {
       
       login(user, token);
       
-      if (user.role === 'ADMIN') navigate('/admin/dashboard');
+      if (user.role === 'ADMINISTRADOR') navigate('/admin/dashboard');
       else if (user.role === 'ANFITRION') navigate('/anfitrion/propiedades');
       else navigate('/');
       

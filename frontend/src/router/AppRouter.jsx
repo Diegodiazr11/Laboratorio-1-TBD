@@ -8,12 +8,11 @@ import MyReservations from '../pages/MyReservations.jsx';
 import AccommodationDetail from '../pages/AccommodationDetail.jsx';
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import HostProperties from '../pages/HostProperties.jsx';
+import Footer from '../components/Footer.jsx';
 
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
-      <Navbar />
       <div style={{ padding: '1rem' }}>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -29,13 +28,12 @@ export default function AppRouter() {
             <Route path="/anfitrion/propiedades" element={<HostProperties />} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['ADMINISTRADOR']} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
-    </BrowserRouter>
   );
 }
