@@ -4,13 +4,13 @@ import cl.alojamientos.backend.models.Alojamiento;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Repository
 public class AlojamientoRepository {
@@ -43,7 +43,7 @@ public class AlojamientoRepository {
     public Long save(Alojamiento alojamiento){
         String sql = "INSERT INTO alojamiento (anfitrion_id, tipo_id, ciudad_id, politica_id, " +
                 "titulo, capacidad_max, precio_base_noche, estadia_minima, estado_publicacion) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDIENTE')";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDIENTE') RETURNING id";
 
         return jdbcTemplate.queryForObject(sql, Long.class,
                 alojamiento.getAnfitrionId(),
@@ -94,4 +94,25 @@ public class AlojamientoRepository {
                 "WHERE id = ? AND anfitrion_id = ?";
         return jdbcTemplate.update(sql, id, anfitrionId);
     }
+
+    public List<Alojamiento> searchAvailable(Long ciudadId, LocalDate checkin, LocalDate checkout, Integer huespedes) {
+        String sql = """
+        SELECT *
+        FROM alojamiento
+        WHERE alojamiento.ciudad_id = ?
+          AND alojamiento.estado_publicacion = 'PUBLICADO'
+          AND alojamiento.capacidad_max >= ?
+          AND (?::date - ?::date) >= alojamiento.estadia_minima
+          AND public.fn_alojamiento_disponible(alojamiento.id, ?::date, ?::date)
+        ORDER BY alojamiento.precio_base_noche ASC
+    """;
+        return jdbcTemplate.query(sql, alojamientoRowMapper, ciudadId, huespedes, checkout, checkin, checkin, checkout);
+    }
+
+    public int changePostState(Long id, String estado) {
+        String sql = "UPDATE alojamiento SET estado_publicacion = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, estado, id);
+    }
+
 }
+
