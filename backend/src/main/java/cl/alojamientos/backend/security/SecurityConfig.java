@@ -40,17 +40,27 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Registro y Login
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/buscar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/*/resenas").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/resenas/alojamientos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/ciudades/**", "/api/tipos-alojamiento/**").permitAll()
 
-                        .requestMatchers("/api/reservas/**").hasRole("HUESPED")
+                        .requestMatchers("/api/reservas/mias/**").hasRole("HUESPED")
+                        .requestMatchers(HttpMethod.POST, "/api/reservas/**").hasRole("HUESPED")
+                        .requestMatchers("/api/reservas/mis-alojamientos/**").hasRole("ANFITRION")
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/*").hasAnyRole("HUESPED", "ANFITRION", "ADMINISTRADOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/resenas/misresenas").hasRole("HUESPED")
                         .requestMatchers(HttpMethod.POST, "/api/resenas/**").hasRole("HUESPED")
+                        .requestMatchers(HttpMethod.DELETE, "/api/resenas/**").hasRole("HUESPED")
 
+                        .requestMatchers(HttpMethod.GET, "/api/alojamientos/mis-publicaciones").hasRole("ANFITRION")
                         .requestMatchers(HttpMethod.POST, "/api/alojamientos/**").hasRole("ANFITRION")
                         .requestMatchers(HttpMethod.PUT, "/api/alojamientos/**").hasRole("ANFITRION")
                         .requestMatchers(HttpMethod.DELETE, "/api/alojamientos/**").hasRole("ANFITRION")
+                        .requestMatchers("/api/temporadas/**").hasRole("ANFITRION")
 
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
-
-                        .requestMatchers(HttpMethod.GET, "/api/ciudades/**", "/api/tipos-alojamiento/**").permitAll()
+                        .requestMatchers("/api/resenas/admin/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/reservas/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/ciudades/**", "/api/tipos-alojamiento/**").hasRole("ADMINISTRADOR")
 
                         .anyRequest().authenticated()
