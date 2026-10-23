@@ -63,6 +63,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/reservas/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/ciudades/**", "/api/tipos-alojamiento/**").hasRole("ADMINISTRADOR")
 
+                        .requestMatchers("/api/alojamientos/*/tarifas/**").hasRole("ANFITRION")
+
+                        .requestMatchers(HttpMethod.POST, "/api/pago").hasRole("HUESPED")
+
+                        .requestMatchers(HttpMethod.GET, "/api/alojamientos/*/calendario").permitAll()
+                        .requestMatchers("/api/alojamientos/*/calendario/**").hasRole("ANFITRION")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
