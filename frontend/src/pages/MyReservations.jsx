@@ -18,7 +18,7 @@ export default function MyReservations() {
   const fetchMyReservations = async () => {
     setLoading(true);
     try {
-      const response = await axiosClient.get('/reservas/mis-reservas');
+      const response = await axiosClient.get('/reservas/mias');
       setReservations(response.data);
     } catch (err) {
       setError('Error al cargar tus reservas.');
@@ -47,10 +47,12 @@ export default function MyReservations() {
     if (!selectedRes) return;
 
     try {
-      await axiosClient.post(`/alojamientos/${selectedRes.accommodation_id || selectedRes.alojamiento_id}/resenas`, {
-        reservation_id: selectedRes.id,
-        rating,
-        comment,
+      const alojamientoId = selectedRes.alojamiento?.id || selectedRes.alojamientoId;
+      
+      await axiosClient.post(`/alojamientos/${alojamientoId}/resenas`, {
+        reservaId: selectedRes.id,
+        calificacion: rating,
+        comentario: comment,
       });
 
       setMessage('¡Reseña publicada con éxito!');
@@ -63,7 +65,7 @@ export default function MyReservations() {
   };
 
   const getStatusBadge = (status) => {
-    const statusUpper = status?.toUpperCase();
+    const statusUpper = status?.toUpperCase() || '';
     switch (statusUpper) {
       case 'CONFIRMADA':
       case 'ACTIVA':
@@ -108,34 +110,42 @@ export default function MyReservations() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reservations.map((res) => {
-            const currentStatus = res.status || res.estado;
+            const currentStatus = res.estado || res.status;
+            
             return (
               <div 
                 key={res.id} 
                 className="bg-white rounded-2xl border border-gray-100 shadow-xs hover:shadow-md transition-shadow p-6 flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex justify-between items-start gap-2 mb-3">
+                  <div className="flex justify-between items-start gap-2 mb-1">
                     <h3 className="font-bold text-gray-900 text-lg line-clamp-1">
-                      {res.accommodation_name || res.alojamiento_nombre}
+                      {res.alojamiento?.nombre || res.alojamiento?.titulo || 'Alojamiento'}
                     </h3>
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full border uppercase ${getStatusBadge(currentStatus)}`}>
                       {currentStatus}
                     </span>
                   </div>
+                  
+                  {/* TIPO DE ALOJAMIENTO AGREGADO AQUÍ */}
+                  <p className="text-xs text-rose-600 font-semibold mb-4 uppercase tracking-wide">
+                    {res.alojamiento?.tipoAlojamiento?.nombre || res.alojamiento?.tipo?.nombre || 'Alojamiento'}
+                  </p>
 
                   <div className="space-y-1.5 text-sm text-gray-600 mb-6">
-                    <p className="flex items-center gap-1">
-                      {res.city || res.ciudad}
+                    <p className="flex items-center gap-1 font-medium text-gray-800">
+                      {/* CIUDAD CORREGIDA AQUÍ (accediendo a .nombre) */}
+                      📍 {res.alojamiento?.ciudad?.nombre || 'Ciudad no disponible'}
                     </p>
                     <p className="flex items-center gap-1">
-                      <strong className="font-medium text-gray-800">Desde:</strong> {res.start_date} <strong className="font-medium text-gray-800">Hasta:</strong> {res.end_date}
+                      <strong className="font-medium text-gray-800">Desde:</strong> {res.fechaCheckin} 
+                      <strong className="font-medium text-gray-800 ml-2">Hasta:</strong> {res.fechaCheckout}
                     </p>
                     <p className="flex items-center gap-1">
-                      Huéspedes: {res.guests_count}
+                      Huéspedes: {res.numHuespedes || res.cantidadHuespedes}
                     </p>
                     <p className="flex items-center gap-1 text-base font-extrabold text-gray-900 pt-2 border-t border-gray-100">
-                      Total: ${res.total_price}
+                      Total: ${res.precioTotal || res.total || 0}
                     </p>
                   </div>
                 </div>
@@ -151,7 +161,7 @@ export default function MyReservations() {
                     </button>
                   )}
 
-                  {currentStatus === 'COMPLETADA' && !res.has_review && (
+                  {currentStatus === 'COMPLETADA' && (
                     <button
                       className="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-xs"
                       onClick={() => setSelectedRes(res)}
@@ -171,7 +181,7 @@ export default function MyReservations() {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100">
             <h2 className="text-xl font-bold text-gray-900 mb-1">Dejar Reseña</h2>
             <p className="text-xs text-gray-500 mb-4">
-              Para: <strong className="text-gray-800">{selectedRes.accommodation_name || selectedRes.alojamiento_nombre}</strong>
+              Para: <strong className="text-gray-800">{selectedRes.alojamiento?.nombre || 'este alojamiento'}</strong>
             </p>
 
             <form onSubmit={handleReviewSubmit} className="space-y-4">

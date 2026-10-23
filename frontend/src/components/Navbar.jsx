@@ -50,13 +50,21 @@ export default function Navbar() {
               </Link>
             )}
 
-            {userRole === 'ADMIN' && (
-              <Link 
-                to="/admin/dashboard" 
-                className="text-gray-600 hover:text-rose-600 font-medium transition-colors"
-              >
-                Panel Admin
-              </Link>
+            {userRole === 'ADMINISTRADOR' && (
+              <>
+                <Link 
+                  to="/admin/dashboard" 
+                  className="text-gray-600 hover:text-rose-600 font-medium transition-colors"
+                >
+                  Panel Admin
+                </Link>
+                <Link 
+                  to="/admin/catalogos" 
+                  className="text-gray-600 hover:text-rose-600 font-medium transition-colors"
+                >
+                  Catálogos
+                </Link>
+              </>
             )}
 
             {user ? (

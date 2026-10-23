@@ -9,6 +9,7 @@ import AccommodationDetail from '../pages/AccommodationDetail.jsx';
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import HostProperties from '../pages/HostProperties.jsx';
 import Footer from '../components/Footer.jsx';
+import AdminCatalogos from '../components/AdminCatalogos.jsx';
 
 
 export default function AppRouter() {
@@ -30,6 +31,7 @@ export default function AppRouter() {
 
           <Route element={<ProtectedRoute allowedRoles={['ADMINISTRADOR']} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/catalogos" element={<AdminCatalogos />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
