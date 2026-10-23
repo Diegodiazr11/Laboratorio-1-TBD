@@ -33,7 +33,7 @@ public class UserRepository {
     };
 
     public void save(User user){
-        String sql = "INSERT INTO user (nombre, email, password_hash, rol, estado)" +
+        String sql = "INSERT INTO usuario (nombre, email, password_hash, rol, estado)" +
                      "VALUES (?,?,?,?,'ACTIVO')";
         jdbcTemplate.update(sql,
                 user.getNombre(),
@@ -44,7 +44,7 @@ public class UserRepository {
     }
 
     public Optional<User> findByEmail(String email){
-        String sql = "SELECT * FROM user WHERE email = ?";
+        String sql = "SELECT * FROM usuario WHERE email = ?";
         try{
             User user = jdbcTemplate.queryForObject(sql, userRowMapper, email);
             return Optional.ofNullable(user);
