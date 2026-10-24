@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Registro y Login
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/buscar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/*/resenas").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/alojamientos/todos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resenas/alojamientos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ciudades/**", "/api/tipos-alojamiento/**").permitAll()
 

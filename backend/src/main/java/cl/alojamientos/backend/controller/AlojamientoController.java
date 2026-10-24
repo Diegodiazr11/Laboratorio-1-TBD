@@ -58,6 +58,11 @@ public class AlojamientoController {
         return ResponseEntity.ok(alojamientoService.obtenerMisAlojamientos((Long) auth.getDetails()));
     }
 
+
+    @GetMapping
+    public ResponseEntity<List<Alojamiento>> obtenerTodosAlojamientos(){
+        return ResponseEntity.ok(alojamientoService.obtenerTodosAlojamientos());
+    }
     @GetMapping("/buscar")
     public ResponseEntity<List<Alojamiento>> buscarDisponibles(
             @RequestParam Long ciudadId,
@@ -76,5 +81,6 @@ public class AlojamientoController {
                 "calificacionPromedio", promedio,
                 "historialResenas", historial
         ));
+
     }
 }

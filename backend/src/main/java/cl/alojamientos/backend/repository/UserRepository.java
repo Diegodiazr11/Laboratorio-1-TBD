@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -51,5 +52,10 @@ public class UserRepository {
         }catch(EmptyResultDataAccessException e){
             return Optional.empty();
         }
+    }
+
+    public List<User> findAll(){
+        String sql = "SELECT * FROM usuario";
+        return jdbcTemplate.query(sql, userRowMapper);
     }
 }
