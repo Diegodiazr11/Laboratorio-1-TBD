@@ -7,6 +7,7 @@ import cl.alojamientos.backend.service.AlojamientoService;
 import cl.alojamientos.backend.service.ResenaService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,8 +61,8 @@ public class AlojamientoController {
 
 
     @GetMapping
-    public ResponseEntity<List<Alojamiento>> obtenerTodosAlojamientos(){
-        return ResponseEntity.ok(alojamientoService.obtenerTodosAlojamientos());
+    public ResponseEntity<List<Alojamiento>> obtenerTodosAlojamientosPublicados(){
+        return ResponseEntity.ok(alojamientoService.obtenerTodosAlojamientosPublicados());
     }
     @GetMapping("/buscar")
     public ResponseEntity<List<Alojamiento>> buscarDisponibles(
@@ -82,5 +83,11 @@ public class AlojamientoController {
                 "historialResenas", historial
         ));
 
+    }
+
+    @GetMapping("/admin/todos")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<List<Alojamiento>> obtenerTodosParaAdmin() {
+        return ResponseEntity.ok(alojamientoService.obtenerTodos());
     }
 }
