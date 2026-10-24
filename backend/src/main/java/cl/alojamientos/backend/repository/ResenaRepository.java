@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Repository
 public class ResenaRepository {
@@ -63,5 +64,15 @@ public class ResenaRepository {
 
     public int cambiarEstado(Long id, String estado) {
         return jdbcTemplate.update("UPDATE resena SET estado = ? WHERE id = ?", estado, id);
+    }
+
+    public BigDecimal obtainLodgeAverage(Long alojamientoId) {
+        String sql = """
+        SELECT COALESCE(ROUND(AVG(resena.calificacion), 2), 0)
+        FROM resena
+        JOIN reserva ON reserva.id = resena.reserva_id
+        WHERE reserva.alojamiento_id = ? AND resena.estado = 'VISIBLE'
+    """;
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, alojamientoId);
     }
 }

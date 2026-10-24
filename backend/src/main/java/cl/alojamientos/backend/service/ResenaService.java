@@ -7,6 +7,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import java.math.BigDecimal;
 
 import java.util.List;
 
@@ -54,5 +55,9 @@ public class ResenaService {
     private Resena obtener(Long id) {
         return resenaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reseña no encontrada"));
+    }
+
+    public BigDecimal obtainLodgeAverage(Long alojamientoId) {
+        return resenaRepository.obtainLodgeAverage(alojamientoId);
     }
 }
