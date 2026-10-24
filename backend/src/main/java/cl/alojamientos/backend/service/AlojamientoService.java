@@ -78,7 +78,12 @@ public class AlojamientoService {
         }
     }
 
-    public List<Alojamiento> obtenerTodosAlojamientos(){
+    public List<Alojamiento> obtenerTodosAlojamientosPublicados(){
+        return alojamientoRepository.findPublicados();
+    }
+
+    public List<Alojamiento> obtenerTodos() {
         return alojamientoRepository.findAll();
     }
+
 }

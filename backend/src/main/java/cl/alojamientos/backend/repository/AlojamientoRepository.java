@@ -114,8 +114,14 @@ public class AlojamientoRepository {
         return jdbcTemplate.update(sql, estado, id);
     }
 
-    public List<Alojamiento> findAll(){
+    public List<Alojamiento> findPublicados(){
         return jdbcTemplate.query("SELECT * FROM alojamiento WHERE estado_publicacion = 'PUBLICADO'", alojamientoRowMapper);
+    }
+
+    public List<Alojamiento> findAll() {
+        return jdbcTemplate.query(
+                "SELECT * FROM alojamiento ORDER BY id",
+                alojamientoRowMapper);
     }
 }
 
