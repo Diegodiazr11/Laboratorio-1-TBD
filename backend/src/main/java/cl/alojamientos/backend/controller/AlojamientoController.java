@@ -34,4 +34,9 @@ public class AlojamientoController {
     public ResponseEntity<List<Alojamiento>> obtenerMisAlojamientos(Authentication auth) {
         return ResponseEntity.ok(alojamientoService.obtenerMisAlojamientos((Long) auth.getDetails()));
     }
+
+    @GetMapping
+    public ResponseEntity<List<Alojamiento>> obtenerTodosAlojamientos(){
+        return ResponseEntity.ok(alojamientoService.obtenerTodosAlojamientos());
+    }
 }

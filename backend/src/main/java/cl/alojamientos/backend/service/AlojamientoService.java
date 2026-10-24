@@ -77,4 +77,8 @@ public class AlojamientoService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Alojamiento no encontrado");
         }
     }
+
+    public List<Alojamiento> obtenerTodosAlojamientos(){
+        return alojamientoRepository.findAll();
+    }
 }
