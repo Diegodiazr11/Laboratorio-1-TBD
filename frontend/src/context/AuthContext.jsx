@@ -1,34 +1,77 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+const SESSION_MS = 10 * 60 * 1000;
+
+const limpiarSesion = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('expiresAt');
+};
+
+const leerSesionGuardada = () => {
+  const token = localStorage.getItem('token');
+  const expiresAt = Number(localStorage.getItem('expiresAt'));
+
+  if (!token || !expiresAt || Date.now() >= expiresAt) {
+    limpiarSesion();
+    return { token: null, user: null };
+  }
+
+  try {
+    const raw = localStorage.getItem('user');
+    const user = raw && raw !== 'undefined' ? JSON.parse(raw) : null;
+    if (!user) {
+      limpiarSesion();
+      return { token: null, user: null };
     }
-  }, [token]);
+    return { token, user };
+  } catch {
+    limpiarSesion();
+    return { token: null, user: null };
+  }
+};
 
-  const login = (userData, jwtToken) => {
-    setUser(userData); 
-    setToken(jwtToken);
-    localStorage.setItem('token', jwtToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
+export const AuthProvider = ({ children }) => {
+  const [sesion] = useState(leerSesionGuardada);
+  const [user, setUser] = useState(sesion.user);
+  const [token, setToken] = useState(sesion.token);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    limpiarSesion();
+  }, []);
+
+  const login = (userData, jwtToken) => {
+    setUser(userData);
+    setToken(jwtToken);
+    localStorage.setItem('token', jwtToken);
+    localStorage.setItem('expiresAt', String(Date.now() + SESSION_MS));
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
   };
 
+  useEffect(() => {
+    if (!token) return;
+
+    const expiresAt = Number(localStorage.getItem('expiresAt'));
+    const restante = expiresAt - Date.now();
+
+    if (!expiresAt || restante <= 0) {
+      logout();
+      return;
+    }
+
+    const timer = setTimeout(logout, restante);
+    return () => clearTimeout(timer);
+  }, [token, logout]);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading: false, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

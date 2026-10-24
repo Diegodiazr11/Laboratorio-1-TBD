@@ -37,11 +37,12 @@ export default function Register() {
     setLoading(true);
 
     try {
+
       await axiosClient.post('/auth/register', {
-        name,
-        email,
+        nombre: name.trim(),
+        email: email.trim(),
         password,
-        role,
+        rol: role,
       });
 
       navigate('/login');

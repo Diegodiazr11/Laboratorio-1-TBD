@@ -41,8 +41,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/buscar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/*/resenas").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/alojamientos/todos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/alojamientos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resenas/alojamientos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/ciudades/**", "/api/tipos-alojamiento/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/ciudades/**", "/api/tipos-alojamiento/**", "/api/politicas-cancelacion/**").permitAll()
 
                         .requestMatchers("/api/reservas/mias/**").hasRole("HUESPED")
                         .requestMatchers(HttpMethod.POST, "/api/reservas/**").hasRole("HUESPED")
