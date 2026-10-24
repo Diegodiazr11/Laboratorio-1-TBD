@@ -26,7 +26,8 @@ public class ReservaRepository {
             rs.getObject("fecha_checkout", LocalDate.class),
             rs.getInt("num_huespedes"),
             rs.getBigDecimal("total"),
-            rs.getString("estado"));
+            rs.getString("estado")
+    );
 
     public Optional<Reserva> findById(Long id) {
         return jdbcTemplate.query("SELECT * FROM reserva WHERE id = ?", reservaRowMapper, id)
