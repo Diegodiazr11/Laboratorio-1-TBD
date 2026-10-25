@@ -1,12 +1,29 @@
---
--- PostgreSQL database dump
---
+\set ON_ERROR_STOP on
 
+SELECT format('CREATE DATABASE %I', 'alojamientos_db')
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM pg_database
+    WHERE datname = 'alojamientos_db'
+)
+\gexec
 
--- Dumped from database version 18.6
--- Dumped by pg_dump version 18.6
+\connect alojamientos_db
 
--- Started on 2026-10-21 00:08:58
+SELECT CASE
+    WHEN to_regclass('public.usuario') IS NOT NULL
+    THEN 'true'
+    ELSE 'false'
+END AS esquema_existente
+\gset
+
+\if :esquema_existente
+
+\echo 'La base de datos ya tiene tablas. Se conservan los datos existentes.'
+
+\else
+
+BEGIN;
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,53 +36,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
-ALTER TABLE IF EXISTS ONLY public.temporada DROP CONSTRAINT IF EXISTS temporada_alojamiento_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.reserva DROP CONSTRAINT IF EXISTS reserva_huesped_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.reserva DROP CONSTRAINT IF EXISTS reserva_alojamiento_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.resena DROP CONSTRAINT IF EXISTS resena_reserva_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.pago DROP CONSTRAINT IF EXISTS pago_reserva_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.bloqueo_calendario DROP CONSTRAINT IF EXISTS bloqueo_calendario_reserva_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.bloqueo_calendario DROP CONSTRAINT IF EXISTS bloqueo_calendario_alojamiento_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alojamiento DROP CONSTRAINT IF EXISTS alojamiento_tipo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alojamiento DROP CONSTRAINT IF EXISTS alojamiento_politica_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alojamiento DROP CONSTRAINT IF EXISTS alojamiento_ciudad_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alojamiento DROP CONSTRAINT IF EXISTS alojamiento_anfitrion_id_fkey;
-DROP INDEX IF EXISTS public.idx_reserva_rango_fechas;
-DROP INDEX IF EXISTS public.idx_reserva_alojamiento;
-DROP INDEX IF EXISTS public.idx_alojamiento_ciudad;
-ALTER TABLE IF EXISTS ONLY public.usuario DROP CONSTRAINT IF EXISTS usuario_pkey;
-ALTER TABLE IF EXISTS ONLY public.usuario DROP CONSTRAINT IF EXISTS usuario_email_key;
-ALTER TABLE IF EXISTS ONLY public.tipo_alojamiento DROP CONSTRAINT IF EXISTS tipo_alojamiento_pkey;
-ALTER TABLE IF EXISTS ONLY public.tipo_alojamiento DROP CONSTRAINT IF EXISTS tipo_alojamiento_nombre_key;
-ALTER TABLE IF EXISTS ONLY public.temporada DROP CONSTRAINT IF EXISTS temporada_pkey;
-ALTER TABLE IF EXISTS ONLY public.temporada DROP CONSTRAINT IF EXISTS temporada_alojamiento_id_daterange_excl;
-ALTER TABLE IF EXISTS ONLY public.reserva DROP CONSTRAINT IF EXISTS reserva_pkey;
-ALTER TABLE IF EXISTS ONLY public.resena DROP CONSTRAINT IF EXISTS resena_reserva_id_key;
-ALTER TABLE IF EXISTS ONLY public.resena DROP CONSTRAINT IF EXISTS resena_pkey;
-ALTER TABLE IF EXISTS ONLY public.politica_cancelacion DROP CONSTRAINT IF EXISTS politica_cancelacion_pkey;
-ALTER TABLE IF EXISTS ONLY public.politica_cancelacion DROP CONSTRAINT IF EXISTS politica_cancelacion_nombre_key;
-ALTER TABLE IF EXISTS ONLY public.pago DROP CONSTRAINT IF EXISTS pago_pkey;
-ALTER TABLE IF EXISTS ONLY public.ciudad DROP CONSTRAINT IF EXISTS ciudad_pkey;
-ALTER TABLE IF EXISTS ONLY public.ciudad DROP CONSTRAINT IF EXISTS ciudad_nombre_key;
-ALTER TABLE IF EXISTS ONLY public.bloqueo_calendario DROP CONSTRAINT IF EXISTS bloqueo_calendario_pkey;
-ALTER TABLE IF EXISTS ONLY public.alojamiento DROP CONSTRAINT IF EXISTS alojamiento_pkey;
-DROP TABLE IF EXISTS public.usuario;
-DROP TABLE IF EXISTS public.tipo_alojamiento;
-DROP TABLE IF EXISTS public.temporada;
-DROP TABLE IF EXISTS public.reserva;
-DROP TABLE IF EXISTS public.resena;
-DROP TABLE IF EXISTS public.politica_cancelacion;
-DROP TABLE IF EXISTS public.pago;
-DROP TABLE IF EXISTS public.ciudad;
-DROP TABLE IF EXISTS public.bloqueo_calendario;
-DROP TABLE IF EXISTS public.alojamiento;
-DROP FUNCTION IF EXISTS public.fn_precio_noche(p_alojamiento_id integer, p_fecha date);
-DROP FUNCTION IF EXISTS public.fn_porcentaje_reembolso(p_reserva_id integer, p_fecha_cancelacion date);
-DROP FUNCTION IF EXISTS public.fn_calcular_total(p_alojamiento_id integer, p_checkin date, p_checkout date);
-DROP FUNCTION IF EXISTS public.fn_alojamiento_disponible(p_alojamiento_id integer, p_checkin date, p_checkout date);
-DROP EXTENSION IF EXISTS pgcrypto;
-DROP EXTENSION IF EXISTS btree_gist;
 --
 -- TOC entry 2 (class 3079 OID 21349)
 -- Name: btree_gist; Type: EXTENSION; Schema: -; Owner: -
@@ -1007,4 +977,9 @@ ALTER TABLE ONLY public.temporada
 -- PostgreSQL database dump complete
 --
 
+-- Finalizar la instalación inicial.
+COMMIT;
 
+\echo 'Instalación inicial completada correctamente.'
+
+\endif
