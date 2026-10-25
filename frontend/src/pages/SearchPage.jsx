@@ -95,7 +95,7 @@ export default function SearchPage() {
           <select
             value={ciudadId}
             onChange={(e) => setCiudadId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none transition text-sm text-gray-900 bg-white"
+            className="w-full px-3 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none transition text-sm text-gray-900 bg-white"
           >
             <option value="">Todas las ciudades</option>
             {ciudades.map((c) => (
@@ -207,7 +207,7 @@ export default function SearchPage() {
 
                 <Link
                   to={`/alojamiento/${item.id}`}
-                  className="block text-center w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
+                  className="block text-center w-full bg-gray-900 hover:bg-gray-700 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
                 >
                   Ver Detalle y Reservar
                 </Link>

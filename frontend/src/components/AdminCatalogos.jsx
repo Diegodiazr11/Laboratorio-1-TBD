@@ -39,7 +39,6 @@ const AdminCatalogos = () => {
   const handleCrearPolitica = async (e) => {
     e.preventDefault();
     try {
-      // Usamos los nombres exactos que espera tu backend (revisa tu DTO si usan snake_case o camelCase)
       await axiosClient.post('/politicas-cancelacion', {
         nombre: politica.nombre,
         dias_antelacion_total: politica.diasAntelacionTotal,
@@ -72,7 +71,6 @@ const AdminCatalogos = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Formulario Ciudad */}
           <section className="bg-white p-6 shadow-sm rounded-xl border border-gray-200 h-fit">
             <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-100 pb-3 mb-4">Nueva Ciudad</h2>
             <form onSubmit={handleCrearCiudad} className="flex flex-col gap-4">
@@ -93,7 +91,6 @@ const AdminCatalogos = () => {
             </form>
           </section>
 
-          {/* Formulario Tipo de Alojamiento */}
           <section className="bg-white p-6 shadow-sm rounded-xl border border-gray-200 h-fit">
             <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-100 pb-3 mb-4">Nuevo Tipo de Alojamiento</h2>
             <form onSubmit={handleCrearTipo} className="flex flex-col gap-4">
@@ -125,7 +122,6 @@ const AdminCatalogos = () => {
             </form>
           </section>
 
-          {/* Formulario Política de Cancelación */}
           <section className="bg-white p-6 shadow-sm rounded-xl border border-gray-200 lg:col-span-2">
             <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-100 pb-3 mb-4">Nueva Política de Cancelación</h2>
             <form onSubmit={handleCrearPolitica} className="grid grid-cols-1 md:grid-cols-3 gap-5">

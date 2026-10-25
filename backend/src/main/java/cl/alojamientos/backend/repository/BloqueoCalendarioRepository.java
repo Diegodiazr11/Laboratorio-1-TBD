@@ -18,24 +18,14 @@ public class BloqueoCalendarioRepository {
     }
 
     private final RowMapper<BloqueoCalendario> bloqueoRowMapper = (rs, rowNum) -> new BloqueoCalendario(
-            rs.getLong("id"),
             rs.getLong("alojamiento_id"),
-            rs.getObject("fecha_inicio", LocalDate.class),
-            rs.getObject("fecha_fin", LocalDate.class),
-            rs.getString("motivo")
+            rs.getObject("fecha", LocalDate.class),
+            rs.getLong("reserva_id")
     );
 
-    public void save(BloqueoCalendario bloqueo) {
-        String sql = "INSERT INTO bloqueo_calendario (alojamiento_id, fecha_inicio, fecha_fin, motivo) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
-                bloqueo.getAlojamientoId(),
-                bloqueo.getFechaInicio(),
-                bloqueo.getFechaFin(),
-                bloqueo.getMotivo());
-    }
-
     public List<BloqueoCalendario> findByAlojamientoId(Long alojamientoId) {
-        String sql = "SELECT * FROM bloqueo_calendario WHERE alojamiento_id = ?";
+        String sql = "SELECT alojamiento_id, fecha, reserva_id FROM bloqueo_calendario " +
+                "WHERE alojamiento_id = ? ORDER BY fecha";
         return jdbcTemplate.query(sql, bloqueoRowMapper, alojamientoId);
     }
 

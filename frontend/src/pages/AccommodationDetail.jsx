@@ -2,6 +2,33 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/Axios';
 import { useAuth } from '../context/AuthContext';
+import CalendarioDisponibilidad from '../components/CalendarioDisponibilidad'
+
+const pad = (n) => String(n).padStart(2, '0');
+
+const normalizarFecha = (valor) => {
+  if (!valor) return null;
+  if (Array.isArray(valor)) return `${valor[0]}-${pad(valor[1])}-${pad(valor[2])}`;
+  return String(valor).slice(0, 10);
+};
+
+const expandirBloqueo = (b) => {
+  const unica = normalizarFecha(b.fecha);
+  if (unica) return [unica];
+
+  const inicio = normalizarFecha(b.fechaInicio);
+  const fin = normalizarFecha(b.fechaFin);
+  if (!inicio || !fin) return [];
+
+  const dias = [];
+  const cursor = new Date(`${inicio}T00:00:00`);
+  const limite = new Date(`${fin}T00:00:00`);
+  while (cursor <= limite) {
+    dias.push(`${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(cursor.getDate())}`);
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return dias;
+};
 
 const aFecha = (str) => new Date(`${str}T00:00:00`);
 
@@ -22,6 +49,8 @@ export default function AccommodationDetail() {
   const [politicas, setPoliticas] = useState([]);
   const [promedio, setPromedio] = useState(null);
   const [resenas, setResenas] = useState([]);
+  const [fechasBloqueadas, setFechasBloqueadas] = useState(new Set());
+  const [calendarioError, setCalendarioError] = useState(false);
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -57,6 +86,16 @@ export default function AccommodationDetail() {
         setPoliticas(politicasRes.data);
       } catch {
         setPoliticas([]);
+      }
+
+      try {
+        const calendarioRes = await axiosClient.get(`/alojamientos/${id}/calendario`);
+        setFechasBloqueadas(new Set(calendarioRes.data.flatMap(expandirBloqueo)));
+        setCalendarioError(false);
+      } catch (err) {
+        console.error('Error al cargar el calendario:', err.response?.status);
+        setFechasBloqueadas(new Set());
+        setCalendarioError(true);
       }
 
       try {
@@ -112,6 +151,16 @@ export default function AccommodationDetail() {
       setError(`La estadía mínima es de ${accommodation.estadiaMinima} noche(s).`);
       return;
     }
+    const noche = aFecha(startDate);
+    const salida = aFecha(endDate);
+    while (noche < salida) {
+      const clave = `${noche.getFullYear()}-${pad(noche.getMonth() + 1)}-${pad(noche.getDate())}`;
+      if (fechasBloqueadas.has(clave)) {
+        setError('Las fechas elegidas incluyen noches no disponibles. Revisa el calendario.');
+        return;
+      }
+      noche.setDate(noche.getDate() + 1);
+    }
     if (Number(guestsCount) > accommodation.capacidadMax) {
       setError(`La capacidad máxima es de ${accommodation.capacidadMax} personas.`);
       return;
@@ -119,7 +168,24 @@ export default function AccommodationDetail() {
 
     setReserving(true);
     try {
-      // SUPUESTO: estos nombres de campo deben coincidir con el DTO de reserva del back
+      try {
+        const disponibles = await axiosClient.get('/alojamientos/buscar', {
+          params: {
+            ciudadId: accommodation.ciudadId,
+            checkin: startDate,
+            checkout: endDate,
+            huespedes: Number(guestsCount),
+          },
+        });
+        if (!disponibles.data.some((a) => a.id === accommodation.id)) {
+          setError('El alojamiento no está disponible en las fechas elegidas.');
+          setReserving(false);
+          return;
+        }
+      } catch (err) {
+        console.error('No se pudo verificar la disponibilidad:', err.response?.status);
+      }
+
       await axiosClient.post('/reservas', {
         alojamientoId: accommodation.id,
         fechaCheckin: startDate,
@@ -214,8 +280,21 @@ export default function AccommodationDetail() {
             {politica && (
               <div className="p-4 bg-rose-50/50 rounded-xl border border-rose-100 text-xs text-rose-800 space-y-1">
                 <p className="font-bold">Política de cancelación {nombrePolitica}</p>
-                <p>{politica.descripcion}</p>
+                <p>
+                  {politica.descripcion}
+                </p>
               </div>
+            )}
+          </section>
+
+          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-xs">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Disponibilidad</h2>
+            {calendarioError ? (
+              <p className="text-xs text-gray-500 italic">
+                No se pudo cargar el calendario de disponibilidad. Al reservar se verificarán las fechas.
+              </p>
+            ) : (
+              <CalendarioDisponibilidad fechasBloqueadas={fechasBloqueadas} />
             )}
           </section>
 

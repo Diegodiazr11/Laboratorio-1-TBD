@@ -10,9 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BloqueoCalendario {
-    private Long id;
     private Long alojamientoId;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
-    private String motivo;
+    private LocalDate fecha;
+    private Long reservaId;
 }

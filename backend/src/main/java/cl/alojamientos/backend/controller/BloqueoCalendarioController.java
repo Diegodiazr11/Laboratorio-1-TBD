@@ -19,20 +19,6 @@ public class BloqueoCalendarioController {
         this.bloqueoService = bloqueoService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> bloquearFechas(
-            @PathVariable Long alojamientoId,
-            @RequestBody BloqueoCalendarioRequest request,
-            Authentication authentication) {
-        try {
-            Long usuarioId = (Long) authentication.getDetails();
-            bloqueoService.crearBloqueo(alojamientoId, request, usuarioId);
-            return ResponseEntity.ok("Fechas bloqueadas exitosamente.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @GetMapping
     public ResponseEntity<List<BloqueoCalendario>> obtenerBloqueos(@PathVariable Long alojamientoId) {
         return ResponseEntity.ok(bloqueoService.obtenerBloqueosPorAlojamiento(alojamientoId));

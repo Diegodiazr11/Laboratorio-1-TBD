@@ -20,23 +20,6 @@ public class BloqueoCalendarioService {
         this.alojamientoRepository = alojamientoRepository;
     }
 
-    public void crearBloqueo(Long alojamientoId, BloqueoCalendarioRequest request, Long anfitrionId) {
-        Alojamiento alojamiento = alojamientoRepository.findById(alojamientoId)
-                .orElseThrow(() -> new RuntimeException("Alojamiento no encontrado"));
-
-        if (!alojamiento.getAnfitrionId().equals(anfitrionId)) {
-            throw new RuntimeException("Acceso denegado: No eres el anfitrión de este alojamiento");
-        }
-
-        BloqueoCalendario bloqueo = new BloqueoCalendario();
-        bloqueo.setAlojamientoId(alojamientoId);
-        bloqueo.setFechaInicio(request.getFechaInicio());
-        bloqueo.setFechaFin(request.getFechaFin());
-        bloqueo.setMotivo(request.getMotivo());
-
-        bloqueoRepository.save(bloqueo);
-    }
-
     public List<BloqueoCalendario> obtenerBloqueosPorAlojamiento(Long alojamientoId) {
         return bloqueoRepository.findByAlojamientoId(alojamientoId);
     }
