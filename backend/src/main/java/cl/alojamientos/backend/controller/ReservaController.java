@@ -1,14 +1,17 @@
 package cl.alojamientos.backend.controller;
 
+import cl.alojamientos.backend.dto.ReservaRequestDTO;
 import cl.alojamientos.backend.models.Reserva;
 import cl.alojamientos.backend.service.ReservaService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reservas")
@@ -18,6 +21,23 @@ public class ReservaController {
 
     public ReservaController(ReservaService reservaService) {
         this.reservaService = reservaService;
+    }
+
+    @PostMapping
+    public ResponseEntity<Reserva> crear(Authentication auth, @Valid @RequestBody ReservaRequestDTO request) {
+        Long huespedId = (Long) auth.getDetails();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(reservaService.crear(request, huespedId));
+    }
+
+    @PostMapping("/{id}/cancelar")
+    public ResponseEntity<Map<String, Object>> cancelar(Authentication auth, @PathVariable Long id) {
+        Long huespedId = (Long) auth.getDetails();
+        BigDecimal reembolso = reservaService.cancelar(id, huespedId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Reserva cancelada correctamente. Reembolso: $" + reembolso,
+                "reembolso", reembolso
+        ));
     }
 
     @GetMapping("/mias")

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
+import java.util.Map;
 
 @Repository
 public class AlojamientoRepository {
@@ -72,10 +73,11 @@ public class AlojamientoRepository {
     }
 
     public int update(Alojamiento alojamiento) {
+        jdbcTemplate.execute("SET LOCAL app.usuario_id = '" + alojamiento.getAnfitrionId() + "'");
+
         String sql = "UPDATE alojamiento SET tipo_id = ?, ciudad_id = ?, politica_id = ?, titulo = ?, " +
                 "capacidad_max = ?, precio_base_noche = ?, estadia_minima = ? " +
                 "WHERE id = ? AND anfitrion_id = ?";
-
         return jdbcTemplate.update(sql,
                 alojamiento.getTipoId(),
                 alojamiento.getCiudadId(),
@@ -122,6 +124,15 @@ public class AlojamientoRepository {
         return jdbcTemplate.query(
                 "SELECT * FROM alojamiento ORDER BY id",
                 alojamientoRowMapper);
+    }
+
+    public List<Map<String, Object>> obtainOccupationReport() {
+        String sql = "SELECT * FROM public.mv_ocupacion_ingresos_mensuales ORDER BY mes DESC, ciudad ASC";
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    public void refreshOccupationReport() {
+        jdbcTemplate.execute("CALL public.sp_refrescar_dashboard()");
     }
 }
 

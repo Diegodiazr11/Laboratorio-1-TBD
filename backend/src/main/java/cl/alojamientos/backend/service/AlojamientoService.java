@@ -5,9 +5,11 @@ import cl.alojamientos.backend.models.Alojamiento;
 import cl.alojamientos.backend.repository.AlojamientoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AlojamientoService {
@@ -45,7 +47,8 @@ public class AlojamientoService {
         return alojamientoRepository.searchAvailable(ciudadId, checkin, checkout, huespedes);
     }
 
-    public Alojamiento updateLodge(Long id, AlojamientoRequestDTO request, Long anfitrionId) {
+    @Transactional
+    public Alojamiento updateLodge(Long id, AlojamientoRequestDTO request, Long anfitrionId){
         Alojamiento alojamiento = new Alojamiento();
         alojamiento.setId(id);
         alojamiento.setAnfitrionId(anfitrionId);
@@ -86,4 +89,11 @@ public class AlojamientoService {
         return alojamientoRepository.findAll();
     }
 
+    public List<Map<String, Object>> obtainOccupationReport() {
+        return alojamientoRepository.obtainOccupationReport();
+    }
+
+    public void refreshOccupationReport() {
+        alojamientoRepository.refreshOccupationReport();
+    }
 }

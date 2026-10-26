@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Repository
 public class ReservaRepository {
@@ -55,5 +56,15 @@ public class ReservaRepository {
 
     public List<Reserva> findAll() {
         return jdbcTemplate.query("SELECT * FROM reserva ORDER BY fecha_checkin DESC", reservaRowMapper);
+    }
+
+    public Long confirmarReserva(Long alojamientoId, Long huespedId, LocalDate checkin, LocalDate checkout, Integer numHuespedes) {
+        String sql = "CALL public.sp_confirmar_reserva(?::integer, ?::integer, ?::date, ?::date, ?::integer, NULL)";
+        return jdbcTemplate.queryForObject(sql, Long.class, alojamientoId, huespedId, checkin, checkout, numHuespedes);
+    }
+
+    public BigDecimal cancelarReserva(Long reservaId, Long huespedId) {
+        String sql = "CALL public.sp_cancelar_reserva(?::integer, ?::integer, NULL)";
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, reservaId, huespedId);
     }
 }

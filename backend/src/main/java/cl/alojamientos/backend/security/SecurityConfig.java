@@ -64,13 +64,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/resenas/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/reservas/admin/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/ciudades/**", "/api/tipos-alojamiento/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/ciudades/**", "/api/tipos-alojamiento/**", "/api/politicas-cancelacion/**").hasRole("ADMINISTRADOR")
 
                         .requestMatchers("/api/alojamientos/*/tarifas/**").hasRole("ANFITRION")
 
                         .requestMatchers(HttpMethod.POST, "/api/pago").hasRole("HUESPED")
 
-                        .requestMatchers(HttpMethod.GET, "/api/alojamientos/*/calendario").permitAll()
                         .requestMatchers("/api/alojamientos/*/calendario/**").hasRole("ANFITRION")
 
                         .anyRequest().authenticated()
