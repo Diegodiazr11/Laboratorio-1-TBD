@@ -1,53 +1,91 @@
 import { useState, useEffect } from 'react';
 import axiosClient from '../api/Axios';
 
+const mensajeDeError = (err, porDefecto) => {
+  const data = err.response?.data;
+  if (typeof data === 'string' && data) return data;
+  return data?.message || data?.error || porDefecto;
+};
+
+const formatearFecha = (str) =>
+  str ? new Date(`${str}T00:00:00`).toLocaleDateString('es-CL') : '-';
+
+const FORM_VACIO = {
+  titulo: '',
+  tipoId: '',
+  ciudadId: '',
+  politicaId: '',
+  capacidadMax: 2,
+  precioBaseNoche: '',
+  estadiaMinima: 1,
+};
+
 export default function HostProperties() {
   const [activeTab, setActiveTab] = useState('properties');
   const [properties, setProperties] = useState([]);
   const [reservations, setReservations] = useState([]);
+
+  const [tiposAlojamiento, setTiposAlojamiento] = useState([]);
+  const [ciudades, setCiudades] = useState([]);
+  const [politicas, setPoliticas] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'Cabaña',
-    city: '',
-    address: '',
-    capacity: 2,
-    price_per_night: '',
-    cancellation_policy: 'Flexible: Cancelación gratuita hasta 48 hrs antes.',
-  });
+  const [formData, setFormData] = useState(FORM_VACIO);
 
   useEffect(() => {
-    fetchHostData();
+    fetchInitialData();
   }, []);
 
-  const fetchHostData = async () => {
+  const valoresIniciales = (tipos, ciudadesLista, politicasLista) => ({
+    ...FORM_VACIO,
+    tipoId: tipos[0]?.id || '',
+    ciudadId: ciudadesLista[0]?.id || '',
+    politicaId: politicasLista[0]?.id || '',
+  });
+
+  const fetchInitialData = async () => {
     setLoading(true);
     setError('');
     try {
-      const [propsRes, resRes] = await Promise.all([
-        axiosClient.get('/anfitrion/propiedades'),
-        axiosClient.get('/anfitrion/reservas'),
+      const [propsRes, tiposRes, ciudadesRes, politicasRes] = await Promise.all([
+        axiosClient.get('/alojamientos/mis-publicaciones'),
+        axiosClient.get('/tipos-alojamiento'),
+        axiosClient.get('/ciudades'),
+        axiosClient.get('/politicas-cancelacion'),
       ]);
+
       setProperties(propsRes.data);
+      setTiposAlojamiento(tiposRes.data);
+      setCiudades(ciudadesRes.data);
+      setPoliticas(politicasRes.data);
+      setFormData(valoresIniciales(tiposRes.data, ciudadesRes.data, politicasRes.data));
+    } catch (err) {
+      console.error('Error al cargar datos:', err.response?.status, err.response?.data);
+      setError(mensajeDeError(err, 'Error al cargar los datos desde el servidor.'));
+    }
+
+    try {
+      const resRes = await axiosClient.get('/reservas/mis-alojamientos');
       setReservations(resRes.data);
     } catch (err) {
-      setError(
-        err.response?.data?.message || 'Error al cargar la información del anfitrión.'
-      );
-    } finally {
-      setLoading(false);
+      console.error('Error al cargar reservas:', err.response?.status);
+      setReservations([]);
     }
+
+    setLoading(false);
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value === '' ? '' : type === 'number' || name.endsWith('Id') ? Number(value) : value,
+    }));
   };
 
   const handleCreateProperty = async (e) => {
@@ -56,42 +94,44 @@ export default function HostProperties() {
     setError('');
     setMessage('');
 
+    const payload = {
+      titulo: formData.titulo.trim(),
+      tipoId: Number(formData.tipoId),
+      ciudadId: Number(formData.ciudadId),
+      politicaId: Number(formData.politicaId),
+      capacidadMax: Number(formData.capacidadMax),
+      precioBaseNoche: Number(formData.precioBaseNoche),
+      estadiaMinima: Number(formData.estadiaMinima) || 1,
+    };
+
     try {
-      await axiosClient.post('/alojamientos', formData);
-      setMessage('Propiedad enviada a revisión con éxito.');
+      await axiosClient.post('/alojamientos', payload);
+      setMessage('Propiedad creada. Quedó pendiente hasta que un administrador la apruebe.');
       setShowModal(false);
-      resetForm();
-      fetchHostData();
+      setFormData(valoresIniciales(tiposAlojamiento, ciudades, politicas));
+
+      const propsRes = await axiosClient.get('/alojamientos/mis-publicaciones');
+      setProperties(propsRes.data);
     } catch (err) {
-      setError(
-        err.response?.data?.message || 'No se pudo registrar la propiedad.'
-      );
+      console.error('Error al crear:', err.response?.status, err.response?.data);
+      setError(mensajeDeError(err, 'No se pudo registrar la propiedad.'));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      type: 'Cabaña',
-      city: '',
-      address: '',
-      capacity: 2,
-      price_per_night: '',
-      cancellation_policy: 'Flexible: Cancelación gratuita hasta 48 hrs antes.',
-    });
-  };
-
   const getStatusBadge = (status) => {
     switch (status?.toUpperCase()) {
-      case 'APROBADA':
-      case 'CONFIRMADA':
+      case 'PUBLICADO':
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'CONFIRMADA':
+        return 'bg-teal-50 text-teal-700 border-teal-200';
+      case 'COMPLETADA':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'PENDIENTE':
         return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'RECHAZADA':
+      case 'SUSPENDIDO':
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'CANCELADA':
         return 'bg-red-50 text-red-700 border-red-200';
       default:
@@ -99,10 +139,19 @@ export default function HostProperties() {
     }
   };
 
+  const textoEstado = (status) => {
+    if (status === 'PENDIENTE') return 'Esperando aprobación del administrador';
+    if (status === 'SUSPENDIDO') return 'Publicación suspendida';
+    return 'Publicación activa';
+  };
+
+  const nombreDe = (lista, id) => lista.find((x) => x.id === id)?.nombre;
+  const tituloDe = (id) => properties.find((p) => p.id === id)?.titulo || `Alojamiento #${id}`;
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <p className="text-gray-500 font-medium animate-pulse">Cargando panel de anfitrión...</p>
+        <p className="text-gray-500 font-medium animate-pulse">Cargando datos de la plataforma...</p>
       </div>
     );
   }
@@ -162,8 +211,8 @@ export default function HostProperties() {
         </button>
       </div>
 
-      {activeTab === 'properties' && (
-        properties.length === 0 ? (
+      {activeTab === 'properties' &&
+        (properties.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
             <p className="text-gray-600 font-medium text-sm">Aún no has publicado ningún alojamiento.</p>
             <button
@@ -176,7 +225,7 @@ export default function HostProperties() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((prop) => {
-              const status = prop.status || prop.estado || 'PENDIENTE';
+              const status = prop.estadoPublicacion || 'PENDIENTE';
               return (
                 <div
                   key={prop.id}
@@ -184,39 +233,52 @@ export default function HostProperties() {
                 >
                   <div>
                     <div className="flex justify-between items-start gap-2 mb-3">
-                      <h3 className="font-bold text-gray-900 text-lg line-clamp-1">
-                        {prop.title || prop.nombre}
-                      </h3>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${getStatusBadge(status)}`}>
+                      <h3 className="font-bold text-gray-900 text-lg line-clamp-1">{prop.titulo}</h3>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${getStatusBadge(status)}`}
+                      >
                         {status}
                       </span>
                     </div>
 
                     <div className="space-y-1.5 text-xs text-gray-600 mb-6">
-                      <p><strong className="text-gray-800">Tipo:</strong> {prop.type || prop.tipo}</p>
-                      <p><strong className="text-gray-800">Ubicación:</strong> {prop.city || prop.ciudad}</p>
-                      <p><strong className="text-gray-800">Dirección:</strong> {prop.address || prop.direccion || 'No especificada'}</p>
-                      <p><strong className="text-gray-800">Capacidad:</strong> {prop.capacity || prop.capacidad} personas</p>
+                      <p>
+                        <strong className="text-gray-800">Tipo:</strong>{' '}
+                        {nombreDe(tiposAlojamiento, prop.tipoId) || '-'}
+                      </p>
+                      <p>
+                        <strong className="text-gray-800">Ciudad:</strong>{' '}
+                        {nombreDe(ciudades, prop.ciudadId) || '-'}
+                      </p>
+                      <p>
+                        <strong className="text-gray-800">Cancelación:</strong>{' '}
+                        {nombreDe(politicas, prop.politicaId) || '-'}
+                      </p>
+                      <p>
+                        <strong className="text-gray-800">Capacidad Máxima:</strong> {prop.capacidadMax} personas
+                      </p>
+                      <p>
+                        <strong className="text-gray-800">Estadía Mínima:</strong> {prop.estadiaMinima || 1}{' '}
+                        noche(s)
+                      </p>
                       <p className="text-base font-extrabold text-gray-900 pt-2 border-t border-gray-100">
-                        ${prop.price_per_night || prop.precio_noche} <span className="text-xs font-normal text-gray-500">/ noche</span>
+                        ${Number(prop.precioBaseNoche).toLocaleString('es-CL')}{' '}
+                        <span className="text-xs font-normal text-gray-500">/ noche</span>
                       </p>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-gray-50 text-right">
-                    <span className="text-[11px] text-gray-400 italic">
-                      {status === 'PENDIENTE' ? 'Esperando aprobación del administrador' : 'Publicación activa'}
-                    </span>
+                    <span className="text-[11px] text-gray-400 italic">{textoEstado(status)}</span>
                   </div>
                 </div>
               );
             })}
           </div>
-        )
-      )}
+        ))}
 
-      {activeTab === 'reservations' && (
-        reservations.length === 0 ? (
+      {activeTab === 'reservations' &&
+        (reservations.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
             <p className="text-gray-600 font-medium text-sm">No has recibido reservas por el momento.</p>
           </div>
@@ -226,7 +288,7 @@ export default function HostProperties() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                    <th className="p-4">Propiedad</th>
+                    <th className="p-4">Alojamiento</th>
                     <th className="p-4">Huésped</th>
                     <th className="p-4">Fechas</th>
                     <th className="p-4">Personas</th>
@@ -235,44 +297,31 @@ export default function HostProperties() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
-                  {reservations.map((res) => {
-                    const status = res.status || res.estado || 'CONFIRMADA';
-                    return (
-                      <tr key={res.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="p-4 font-bold text-gray-900">
-                          {res.accommodation_name || res.alojamiento_nombre}
-                        </td>
-                        <td className="p-4">
-                          <span className="font-medium text-gray-900 block">
-                            {res.guest_name || res.huesped_nombre}
-                          </span>
-                          <span className="text-gray-400">
-                            {res.guest_email || res.huesped_email}
-                          </span>
-                        </td>
-                        <td className="p-4 text-gray-600">
-                          {res.start_date || res.fecha_inicio} al {res.end_date || res.fecha_fin}
-                        </td>
-                        <td className="p-4 text-gray-600">
-                          {res.guests_count || res.huespedes_cantidad} huéspedes
-                        </td>
-                        <td className="p-4 font-bold text-gray-900">
-                          ${res.total_price || res.precio_total}
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase ${getStatusBadge(status)}`}>
-                            {status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {reservations.map((res) => (
+                    <tr key={res.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="p-4 font-bold text-gray-900">{tituloDe(res.alojamientoId)}</td>
+                      <td className="p-4 text-gray-600">Huésped #{res.huespedId}</td>
+                      <td className="p-4 text-gray-600">
+                        {formatearFecha(res.fechaCheckin)} al {formatearFecha(res.fechaCheckout)}
+                      </td>
+                      <td className="p-4 text-gray-600">{res.numHuespedes} huéspedes</td>
+                      <td className="p-4 font-bold text-gray-900">
+                        ${Number(res.total || 0).toLocaleString('es-CL')}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase ${getStatusBadge(res.estado)}`}
+                        >
+                          {res.estado}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
-        )
-      )}
+        ))}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
@@ -294,74 +343,79 @@ export default function HostProperties() {
                 </label>
                 <input
                   type="text"
-                  name="title"
+                  name="titulo"
                   placeholder="Ej. Cabaña Rústica con Tinaja"
-                  value={formData.title}
+                  value={formData.titulo}
                   onChange={handleInputChange}
                   required
+                  maxLength={150}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Tipo de Inmueble
-                  </label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Tipo</label>
                   <select
-                    name="type"
-                    value={formData.type}
+                    name="tipoId"
+                    value={formData.tipoId}
                     onChange={handleInputChange}
+                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900 bg-white"
                   >
-                    <option value="Cabaña">Cabaña</option>
-                    <option value="Departamento">Departamento</option>
-                    <option value="Casa">Casa</option>
-                    <option value="Habitación">Habitación</option>
+                    {tiposAlojamiento.map((tipo) => (
+                      <option key={tipo.id} value={tipo.id}>
+                        {tipo.nombre}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Ciudad / Destino
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="Ej. Pucón"
-                    value={formData.city}
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Ciudad</label>
+                  <select
+                    name="ciudadId"
+                    value={formData.ciudadId}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900"
-                  />
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900 bg-white"
+                  >
+                    {ciudades.map((ciudad) => (
+                      <option key={ciudad.id} value={ciudad.id}>
+                        {ciudad.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Política</label>
+                  <select
+                    name="politicaId"
+                    value={formData.politicaId}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900 bg-white"
+                  >
+                    {politicas.map((pol) => (
+                      <option key={pol.id} value={pol.id}>
+                        {pol.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  Dirección
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Ej. Av. Principal 123"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Capacidad Máxima
+                    Capacidad Máx.
                   </label>
                   <input
                     type="number"
-                    name="capacity"
+                    name="capacidadMax"
                     min="1"
-                    value={formData.capacity}
+                    value={formData.capacidadMax}
                     onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900"
@@ -370,13 +424,29 @@ export default function HostProperties() {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Precio por Noche ($)
+                    Precio/Noche ($)
                   </label>
                   <input
                     type="number"
-                    name="price_per_night"
+                    name="precioBaseNoche"
+                    min="1"
                     placeholder="50000"
-                    value={formData.price_per_night}
+                    value={formData.precioBaseNoche}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Estadía Mín.
+                  </label>
+                  <input
+                    type="number"
+                    name="estadiaMinima"
+                    min="1"
+                    value={formData.estadiaMinima}
                     onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900"
@@ -384,20 +454,9 @@ export default function HostProperties() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  Descripción Corta
-                </label>
-                <textarea
-                  name="description"
-                  rows="3"
-                  placeholder="Describe los servicios y atractivos de la propiedad..."
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs text-gray-900 resize-none"
-                />
-              </div>
+              <p className="text-[11px] text-gray-500">
+                Tu propiedad quedará en estado pendiente hasta que un administrador la apruebe.
+              </p>
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
@@ -412,7 +471,7 @@ export default function HostProperties() {
                   disabled={submitting}
                   className="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors cursor-pointer disabled:bg-gray-300"
                 >
-                  {submitting ? 'Guardando...' : 'Enviar a Revisión'}
+                  {submitting ? 'Creando...' : 'Crear Propiedad'}
                 </button>
               </div>
             </form>

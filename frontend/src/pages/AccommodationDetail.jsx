@@ -6,12 +6,14 @@ import CalendarioDisponibilidad from '../components/CalendarioDisponibilidad'
 
 const pad = (n) => String(n).padStart(2, '0');
 
+// Convierte una fecha del back ("2026-09-11" o [2026, 9, 11]) a "YYYY-MM-DD"
 const normalizarFecha = (valor) => {
   if (!valor) return null;
   if (Array.isArray(valor)) return `${valor[0]}-${pad(valor[1])}-${pad(valor[2])}`;
   return String(valor).slice(0, 10);
 };
 
+// Cada bloqueo puede venir como una noche ("fecha") o como un rango (inicio y fin)
 const expandirBloqueo = (b) => {
   const unica = normalizarFecha(b.fecha);
   if (unica) return [unica];
@@ -70,6 +72,7 @@ export default function AccommodationDetail() {
     setLoading(true);
     setLoadError('');
     try {
+      // El back no tiene GET /alojamientos/{id}: se pide la lista de publicados y se busca por id
       const [alojRes, ciudadesRes, tiposRes] = await Promise.all([
         axiosClient.get('/alojamientos'),
         axiosClient.get('/ciudades'),
@@ -88,6 +91,7 @@ export default function AccommodationDetail() {
         setPoliticas([]);
       }
 
+      // El calendario es opcional: si falla, el detalle igual se muestra
       try {
         const calendarioRes = await axiosClient.get(`/alojamientos/${id}/calendario`);
         setFechasBloqueadas(new Set(calendarioRes.data.flatMap(expandirBloqueo)));
@@ -98,6 +102,7 @@ export default function AccommodationDetail() {
         setCalendarioError(true);
       }
 
+      // Las reseñas son opcionales: si fallan, el detalle igual se muestra
       try {
         const resenasRes = await axiosClient.get(`/alojamientos/${id}/resenas`);
         setPromedio(resenasRes.data.calificacionPromedio);
@@ -168,6 +173,7 @@ export default function AccommodationDetail() {
 
     setReserving(true);
     try {
+      // Comprueba la disponibilidad real con el endpoint de búsqueda
       try {
         const disponibles = await axiosClient.get('/alojamientos/buscar', {
           params: {
@@ -186,14 +192,17 @@ export default function AccommodationDetail() {
         console.error('No se pudo verificar la disponibilidad:', err.response?.status);
       }
 
-      await axiosClient.post('/reservas', {
+      const respuesta = await axiosClient.post('/reservas', {
         alojamientoId: accommodation.id,
         fechaCheckin: startDate,
         fechaCheckout: endDate,
         numHuespedes: Number(guestsCount),
       });
 
-      setMessage('¡Reserva creada con éxito!');
+      const reserva = respuesta.data;
+      const estado = reserva?.estado ? reserva.estado.toLowerCase() : 'creada';
+      const total = reserva?.total != null ? ` Total: ${formato(reserva.total)}.` : '';
+      setMessage(`¡Reserva ${estado} con éxito!${total}`);
       setTimeout(() => navigate('/mis-reservas'), 2000);
     } catch (err) {
       console.error('Error al reservar:', err.response?.status, err.response?.data);

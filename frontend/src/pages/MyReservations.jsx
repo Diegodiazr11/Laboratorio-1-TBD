@@ -83,7 +83,6 @@ export default function MyReservations() {
     setMessage('');
 
     try {
-      // SUPUESTO: confirma la ruta y el método de cancelación en tu back
       const response = await axiosClient.post(`/reservas/${reservationId}/cancelar`);
       const data = response.data;
       setMessage(

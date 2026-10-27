@@ -25,20 +25,24 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center space-x-4 sm:space-x-6 text-xs sm:text-sm">
+          {userRole != "ANFITRION" && userRole != "ADMINISTRADOR" && (
             <Link 
-              to="/" 
+            to="/" 
               className="text-gray-600 hover:text-rose-600 font-medium transition-colors"
             >
               Buscar Alojamientos
-            </Link>
+          </Link>
+          )}
 
             {userRole === 'HUESPED' && (
-              <Link 
-                to="/mis-reservas" 
-                className="text-gray-600 hover:text-rose-600 font-medium transition-colors"
-              >
-                Mis Reservas
-              </Link>
+              <>
+                <Link 
+                  to="/mis-reservas" 
+                  className="text-gray-600 hover:text-rose-600 font-medium transition-colors"
+                >
+                  Mis Reservas
+                </Link>
+              </>
             )}
 
             {userRole === 'ANFITRION' && (
