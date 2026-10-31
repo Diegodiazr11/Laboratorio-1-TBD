@@ -612,15 +612,15 @@ INSERT INTO public.tipo_alojamiento VALUES (3, 'Casa', 'Casa espaciosa para fami
 -- Data for Name: usuario; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.usuario VALUES (1, 'ADMINISTRADOR', 'Admin Plataforma', 'admin@alojamientos.cl', '$2a$06$eJx2wgr8GQT7Rk17znKuee0MzEv1NiIpDgT/2dThkTRuswibu6/yS', 'ACTIVO');
-INSERT INTO public.usuario VALUES (2, 'ANFITRION', 'Carolina Muñoz', 'carolina@anfitrion.cl', '$2a$06$AsjWyuKDuDu3ty6D4VM2eOFoRF7StjI8O.D8mcx5E3LDIAdsED4Pi', 'ACTIVO');
-INSERT INTO public.usuario VALUES (3, 'ANFITRION', 'Rodrigo Fuentes', 'rodrigo@anfitrion.cl', '$2a$06$fdiCS.st6CVJ5WOv5Y6fk.3wmPznP99oJauGtBXKjtjGnsUqXDLx2', 'ACTIVO');
-INSERT INTO public.usuario VALUES (4, 'ANFITRION', 'Valentina Soto', 'valentina@anfitrion.cl', '$2a$06$Z3Qdz9e13sU0EOb0zynFRuuK2TENdWkOi/VtP7RJwRUFQfQcOedVa', 'ACTIVO');
-INSERT INTO public.usuario VALUES (5, 'HUESPED', 'Matías Rojas', 'matias@huesped.cl', '$2a$06$IyX/VTtoHrXBRb2.DjDP0OxbVMDcneJkfqASsPktwJTJMe4jP81Py', 'ACTIVO');
-INSERT INTO public.usuario VALUES (6, 'HUESPED', 'Camila Pérez', 'camila@huesped.cl', '$2a$06$PWtc9YzKCC5abYCHoARee.fPu6FHuv/Ixrvm.0LTQix9OcK.KxTMW', 'ACTIVO');
-INSERT INTO public.usuario VALUES (7, 'HUESPED', 'Diego Araya', 'diego@huesped.cl', '$2a$06$MhvTLIA3i6Cjf3rXVqOeAuhewwht2PwBfOQOI/oYSm4hFTxEhXPlK', 'ACTIVO');
-INSERT INTO public.usuario VALUES (8, 'HUESPED', 'Francisca Vidal', 'francisca@huesped.cl', '$2a$06$z2/hQ4UkoUMNl4dhYwnQ9.7f0nwE1C6ATPKBI0JDpPvfZUxtK90vi', 'ACTIVO');
-INSERT INTO public.usuario VALUES (9, 'HUESPED', 'Sebastián Contreras', 'sebastian@huesped.cl', '$2a$06$G2FH7p1hS3X6jaDBhB1SbOyF0yuABwdh0f8ptKAvsr5xPVpE8/6J.', 'ACTIVO');
+INSERT INTO public.usuario VALUES (1, 'ADMINISTRADOR', 'Admin Plataforma', 'admin@alojamientos.cl', '$2a$10$UUGeRta4YZaQ8BlIAwdsbOoaEiCUSgf.aSmWX/qMQXNKWp2gYck3G', 'ACTIVO');
+INSERT INTO public.usuario VALUES (2, 'ANFITRION', 'Carolina Muñoz', 'carolina@anfitrion.cl', '$2a$10$TNSpjZT.SRHuPBnp6o3M1e6fxExo.RJoNVP28w3JAs6zR/Yc5glXG', 'ACTIVO');
+INSERT INTO public.usuario VALUES (3, 'ANFITRION', 'Rodrigo Fuentes', 'rodrigo@anfitrion.cl', '$2a$10$8rBuVd0wg5pUn7DIgzpq3.jz9dX02zpTGH8m6bkSvMMdnaeEg6SXi', 'ACTIVO');
+INSERT INTO public.usuario VALUES (4, 'ANFITRION', 'Valentina Soto', 'valentina@anfitrion.cl', '$2a$10$IGRUI8iB8Oqd.DiygmOyreevPSOidhvfd9TCk7r4E00uDDg6h3YKq', 'ACTIVO');
+INSERT INTO public.usuario VALUES (5, 'HUESPED', 'Matías Rojas', 'matias@huesped.cl', '$2a$10$fBxFMR575aOUGIt/iRuGvuLlpSrdGgLs4wHbNw4N.cirdrfwQe5gi', 'ACTIVO');
+INSERT INTO public.usuario VALUES (6, 'HUESPED', 'Camila Pérez', 'camila@huesped.cl', '$2a$10$aoThcYFQyycBCJvPgHUQTe1gb6yTB/wKaW.o5LQWk7wzz65JRSiBC', 'ACTIVO');
+INSERT INTO public.usuario VALUES (7, 'HUESPED', 'Diego Araya', 'diego@huesped.cl', '$2a$10$AIDGE1G4FByiHnwDcyANxO3OVd0M2KeurMEAvhAontExSTWSSGP.e', 'ACTIVO');
+INSERT INTO public.usuario VALUES (8, 'HUESPED', 'Francisca Vidal', 'francisca@huesped.cl', '$2a$10$vMTsW3AtbtwM9/U22LgexOuiChvbAOEMETt3F/LhYT8vsz6J45zN6', 'ACTIVO');
+INSERT INTO public.usuario VALUES (9, 'HUESPED', 'Sebastián Contreras', 'sebastian@huesped.cl', '$2a$10$MqR1GzCxmjGOC4oT4JvPrugRxcQ2HGSdHQ4oT95qLoZqFnzI0I9py', 'ACTIVO');
 
 
 --

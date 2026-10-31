@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${USER_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
+      POSTGRES_DB: ${NOMBRE_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/alojamientos_db.sql:/docker-entrypoint-initdb.d/01-instalacion.sql:ro
+      - ./database/procedimientos.sql:/docker-entrypoint-initdb.d/02-procedimientos.sql:ro
+      - ./database/triggers_auditoria.sql:/docker-entrypoint-initdb.d/03-triggers.sql:ro
+      - ./database/vista_materializada.sql:/docker-entrypoint-initdb.d/04-vista-dashboard.sql:ro
+    ports:
+      - "5433:5432" 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB} -d ${NOMBRE_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NOMBRE_DB: ${NOMBRE_DB}
+      PUERTO_DB: db:5432     
+      USER_DB: ${USER_DB}
+      PASSWORD_DB: ${PASSWORD_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:
