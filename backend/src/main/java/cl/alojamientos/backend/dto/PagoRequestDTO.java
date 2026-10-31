@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 public class PagoRequestDTO {
     private Long reservaId;
     private BigDecimal monto;
-    private String metodoPago;
+    private String tipo;
 }

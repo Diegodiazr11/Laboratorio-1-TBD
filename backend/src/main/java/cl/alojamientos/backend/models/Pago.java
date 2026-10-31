@@ -16,6 +16,5 @@ public class Pago {
     private Long reservaId;
     private BigDecimal monto;
     private LocalDateTime fechaPago;
-    private String metodoPago;
-    private String estado; // PENDIENTE, COMPLETADO, REEMBOLSADO
+    private String tipo;
 }

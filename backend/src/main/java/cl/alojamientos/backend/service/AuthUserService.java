@@ -6,8 +6,10 @@ import cl.alojamientos.backend.dto.RegisterRequestDTO;
 import cl.alojamientos.backend.models.User;
 import cl.alojamientos.backend.repository.UserRepository;
 import cl.alojamientos.backend.security.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthUserService {
@@ -24,6 +26,10 @@ public class AuthUserService {
 
     public AuthResponseDTO register(RegisterRequestDTO request){
 
+        if (!"HUESPED".equals(request.getRol()) && !"ANFITRION".equals(request.getRol())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Rol no permitido. Debe ser HUESPED o ANFITRION");
+        }
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
             throw new RuntimeException("El email ya esta registrado");
         }

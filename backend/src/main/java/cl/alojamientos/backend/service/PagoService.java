@@ -21,9 +21,8 @@ public class PagoService {
         Pago pago = new Pago();
         pago.setReservaId(request.getReservaId());
         pago.setMonto(request.getMonto());
-        pago.setMetodoPago(request.getMetodoPago());
+        pago.setTipo(request.getTipo());
         pago.setFechaPago(LocalDateTime.now());
-        pago.setEstado("COMPLETADO");
 
         pagoRepository.save(pago);
     }
