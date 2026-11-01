@@ -38,12 +38,12 @@ Arquitectura desacoplada de tres capas, cada una en su propio contenedor Docker:
 - **Backend:** API REST en capas (`controller` → `service` → `repository`). Un filtro de autenticación valida el JWT y las rutas se protegen por rol (RBAC). Los repositorios ejecutan SQL con `JdbcTemplate` (sin ORM) e invocan los procedimientos almacenados.
 - **Base de datos:** concentra las reglas de negocio con transacciones atómicas, triggers de validación y auditoría, e índices y vista materializada para rendimiento.
 
-| Capa | Tecnología |
-| --- | --- |
-| Base de datos | PostgreSQL 17 (extensiones `btree_gist` y `pgcrypto`) |
-| Backend | Java 21, Spring Boot 3.3.4, Spring Security, Spring JDBC, JWT (jjwt 0.11.5), Lombok, Maven |
-| Frontend | React 19, Vite, React Router 7, Axios, Tailwind CSS 4 |
-| Despliegue | Docker y Docker Compose (el frontend se sirve con Nginx) |
+| Capa          | Tecnología                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Base de datos | PostgreSQL 17 (extensiones `btree_gist` y `pgcrypto`)                                      |
+| Backend       | Java 21, Spring Boot 3.3.4, Spring Security, Spring JDBC, JWT (jjwt 0.11.5), Lombok, Maven |
+| Frontend      | React 19, Vite, React Router 7, Axios, Tailwind CSS 4                                      |
+| Despliegue    | Docker y Docker Compose (el frontend se sirve con Nginx)                                   |
 
 ## 2. Estructura del repositorio
 
@@ -122,10 +122,10 @@ El sistema está listo cuando el backend muestra en la consola un mensaje simila
 
 **Paso 4. Abrir la aplicación**
 
-| Servicio | URL |
-| --- | --- |
-| Frontend (aplicación web) | http://localhost:5173 |
-| PostgreSQL | `localhost:5433` (usuario y clave del `.env`, base `alojamientos_db`) |
+| Servicio                  | URL                                                                   |
+| ------------------------- | --------------------------------------------------------------------- |
+| Frontend (aplicación web) | http://localhost:5173                                                 |
+| PostgreSQL                | `localhost:5433` (usuario y clave del `.env`, base `alojamientos_db`) |
 
 **Paso 5. Iniciar sesión** con alguna de las [cuentas de prueba](#7-datos-de-prueba).
 
@@ -133,13 +133,13 @@ El sistema está listo cuando el backend muestra en la consola un mensaje simila
 
 Se definen en el archivo `.env` de la raíz.
 
-| Variable | Descripción |
-| --- | --- |
-| `NOMBRE_DB` | Nombre de la base de datos. **Debe ser `alojamientos_db`**, que es la que crean y usan los scripts SQL. |
-| `USER_DB` | Usuario de PostgreSQL. |
-| `PASSWORD_DB` | Contraseña de PostgreSQL. |
-| `JWT_SECRET` | Clave para firmar los tokens JWT. Mínimo 32 caracteres (256 bits). |
-| `JWT_EXPIRATION` | Duración del token en milisegundos (`86400000` = 24 horas). |
+| Variable         | Descripción                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `NOMBRE_DB`      | Nombre de la base de datos. **Debe ser `alojamientos_db`**, que es la que crean y usan los scripts SQL. |
+| `USER_DB`        | Usuario de PostgreSQL.                                                                                  |
+| `PASSWORD_DB`    | Contraseña de PostgreSQL.                                                                               |
+| `JWT_SECRET`     | Clave para firmar los tokens JWT. Mínimo 32 caracteres (256 bits).                                      |
+| `JWT_EXPIRATION` | Duración del token en milisegundos (`86400000` = 24 horas).                                             |
 
 ### 3.4 Comandos útiles
 
@@ -162,13 +162,13 @@ docker compose up --build
 
 ### 3.6 Solución de problemas
 
-| Problema | Solución |
-| --- | --- |
-| `port is already allocated` | Hay otro programa usando 5173, 8080 o 5433. Cerrarlo o liberar el puerto. |
-| El backend se reinicia varias veces al comenzar | Es normal en el primer arranque mientras la base termina de inicializarse; se reinicia solo hasta conectarse. Esperar uno o dos minutos y revisar `docker compose logs -f backend`. |
-| El frontend carga pero el login falla | Confirmar que el backend esté en ejecución (`docker compose ps`) y que se acceda al frontend desde `http://localhost:5173`. La dirección de la API (`http://localhost:8080/api`) está definida en `docker-compose.yml` (`VITE_API_BASE_URL`); si se modifica, reconstruir con `docker compose up --build`. |
-| `variable is not set` o el backend no conecta a la base | Falta el archivo `.env` o alguna variable. Debe estar en la raíz del proyecto. |
-| Los datos o scripts SQL no se actualizan | Aplicar [reiniciar desde cero](#35-reiniciar-desde-cero). |
+| Problema                                                | Solución                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `port is already allocated`                             | Hay otro programa usando 5173, 8080 o 5433. Cerrarlo o liberar el puerto.                                                                                                                                                                                                                                  |
+| El backend se reinicia varias veces al comenzar         | Es normal en el primer arranque mientras la base termina de inicializarse; se reinicia solo hasta conectarse. Esperar uno o dos minutos y revisar `docker compose logs -f backend`.                                                                                                                        |
+| El frontend carga pero el login falla                   | Confirmar que el backend esté en ejecución (`docker compose ps`) y que se acceda al frontend desde `http://localhost:5173`. La dirección de la API (`http://localhost:8080/api`) está definida en `docker-compose.yml` (`VITE_API_BASE_URL`); si se modifica, reconstruir con `docker compose up --build`. |
+| `variable is not set` o el backend no conecta a la base | Falta el archivo `.env` o alguna variable. Debe estar en la raíz del proyecto.                                                                                                                                                                                                                             |
+| Los datos o scripts SQL no se actualizan                | Aplicar [reiniciar desde cero](#35-reiniciar-desde-cero).                                                                                                                                                                                                                                                  |
 
 ## 4. Base de datos
 
@@ -180,17 +180,17 @@ Restricciones relevantes: `CHECK` en capacidad, estadía mínima, precios, fecha
 
 ### 4.2 Objetos programables y de rendimiento
 
-| Requisito | Implementación |
-| --- | --- |
+| Requisito                              | Implementación                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Procedimiento 1:** confirmar reserva | `sp_confirmar_reserva`: valida fechas, huésped activo, alojamiento publicado, capacidad, estadía mínima, solapamientos y bloqueos; bloquea el alojamiento para evitar confirmaciones simultáneas; calcula el total según la tarifa de cada noche (`fn_calcular_total`); crea la reserva, registra el pago y bloquea las fechas del calendario, todo en una transacción. |
-| **Procedimiento 2:** cancelar reserva | `sp_cancelar_reserva`: solo el huésped dueño puede cancelar; calcula el reembolso según la política (flexible, moderada o estricta) con `fn_porcentaje_reembolso`; registra la devolución y libera las fechas. |
-| **Trigger 1:** validación de reglas | `trg_validar_confirmacion`: impide confirmar una reserva que se traslape con otra del mismo alojamiento, que supere la capacidad o que no cumpla la estadía mínima. |
-| **Trigger 2:** auditoría | `trg_auditar_alojamiento` (cambios de precio por noche y de política de cancelación) y `trg_auditar_politica` (cambios en las reglas de cancelación). Guardan valor anterior, nuevo, usuario y fecha en `auditoria_cambios`. |
-| **Vista materializada** | `mv_ocupacion_ingresos_mensuales`: ocupación e ingresos netos por mes, ciudad y tipo de alojamiento (ventana de 25 meses). Alimenta el dashboard del administrador. |
-| **Estado de reservas** | Todos los días a la 01:00 el backend marca como `COMPLETADA` las reservas `CONFIRMADA` cuyo checkout ya pasó. Una reserva completada es la que permite al huésped dejar una reseña. |
-| **Refresco de la vista** | Procedimiento `sp_refrescar_dashboard`. El backend lo ejecuta automáticamente todos los días a las 00:00 (`@Scheduled`), al consultar el reporte y mediante `POST /api/admin/reportes/ocupacion-ingresos/refrescar`. |
-| **Índices** | `idx_reserva_rango_fechas` (GiST sobre el rango de fechas de la reserva), `idx_reserva_alojamiento` (ID del alojamiento en reservas) e `idx_alojamiento_ciudad` (ciudad). |
-| **Funciones auxiliares** | `fn_precio_noche`, `fn_calcular_total`, `fn_alojamiento_disponible`, `fn_porcentaje_reembolso`. |
+| **Procedimiento 2:** cancelar reserva  | `sp_cancelar_reserva`: solo el huésped dueño puede cancelar; calcula el reembolso según la política (flexible, moderada o estricta) con `fn_porcentaje_reembolso`; registra la devolución y libera las fechas.                                                                                                                                                          |
+| **Trigger 1:** validación de reglas    | `trg_validar_confirmacion`: impide confirmar una reserva que se traslape con otra del mismo alojamiento, que supere la capacidad o que no cumpla la estadía mínima.                                                                                                                                                                                                     |
+| **Trigger 2:** auditoría               | `trg_auditar_alojamiento` (cambios de precio por noche y de política de cancelación) y `trg_auditar_politica` (cambios en las reglas de cancelación). Guardan valor anterior, nuevo, usuario y fecha en `auditoria_cambios`.                                                                                                                                            |
+| **Vista materializada**                | `mv_ocupacion_ingresos_mensuales`: ocupación e ingresos netos por mes, ciudad y tipo de alojamiento (ventana de 25 meses). Alimenta el dashboard del administrador.                                                                                                                                                                                                     |
+| **Estado de reservas**                 | Todos los días a la 01:00 el backend marca como `COMPLETADA` las reservas `CONFIRMADA` cuyo checkout ya pasó. Una reserva completada es la que permite al huésped dejar una reseña.                                                                                                                                                                                     |
+| **Refresco de la vista**               | Procedimiento `sp_refrescar_dashboard`. El backend lo ejecuta automáticamente todos los días a las 00:00 (`@Scheduled`), al consultar el reporte y mediante `POST /api/admin/reportes/ocupacion-ingresos/refrescar`.                                                                                                                                                    |
+| **Índices**                            | `idx_reserva_rango_fechas` (GiST sobre el rango de fechas de la reserva), `idx_reserva_alojamiento` (ID del alojamiento en reservas) e `idx_alojamiento_ciudad` (ciudad).                                                                                                                                                                                               |
+| **Funciones auxiliares**               | `fn_precio_noche`, `fn_calcular_total`, `fn_alojamiento_disponible`, `fn_porcentaje_reembolso`.                                                                                                                                                                                                                                                                         |
 
 ## 5. Seguridad y roles (JWT + RBAC)
 
@@ -198,10 +198,10 @@ Restricciones relevantes: `CHECK` en capacidad, estadía mínima, precios, fecha
 2. El cliente envía el token en cada petición: `Authorization: Bearer <token>`.
 3. Un filtro valida el token y asigna el rol; `SecurityConfig` protege cada ruta según el rol.
 
-| Rol | Puede |
-| --- | --- |
-| **Huésped** (`HUESPED`) | Buscar alojamientos, crear y cancelar **sus** reservas y reseñar **sus** estadías completadas. |
-| **Anfitrión** (`ANFITRION`) | Gestionar **sus** alojamientos, tarifas por temporada y bloqueos de calendario; ver las reservas de sus propiedades. |
+| Rol                                 | Puede                                                                                                                   |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Huésped** (`HUESPED`)             | Buscar alojamientos, crear y cancelar **sus** reservas y reseñar **sus** estadías completadas.                          |
+| **Anfitrión** (`ANFITRION`)         | Gestionar **sus** alojamientos, tarifas por temporada y bloqueos de calendario; ver las reservas de sus propiedades.    |
 | **Administrador** (`ADMINISTRADOR`) | Moderar publicaciones y reseñas, gestionar usuarios y catálogos (ciudades, tipos y políticas) y consultar el dashboard. |
 
 Las rutas sin token son solo de lectura pública: login, registro, búsqueda y detalle de alojamientos, calendario, reseñas y catálogos.
@@ -216,41 +216,41 @@ Las rutas sin token son solo de lectura pública: login, registro, búsqueda y d
 
 ### 6.1 Resumen de endpoints
 
-| Método | Ruta | Acceso | Descripción |
-| --- | --- | --- | --- |
-| POST | `/auth/register` | Público | Registrar usuario |
-| POST | `/auth/login` | Público | Iniciar sesión y obtener JWT |
-| GET | `/alojamientos` | Público | Listar alojamientos publicados |
-| GET | `/alojamientos/buscar` | Público | Buscar disponibles por ciudad, fechas y huéspedes |
-| GET | `/alojamientos/{id}/resenas` | Público | Calificación promedio e historial de reseñas |
-| GET | `/alojamientos/{id}/calendario` | Público | Fechas bloqueadas del alojamiento |
-| POST | `/alojamientos` | Anfitrión | Crear alojamiento (queda pendiente de aprobación) |
-| PUT | `/alojamientos/{id}` | Anfitrión | Actualizar un alojamiento propio |
-| DELETE | `/alojamientos/{id}` | Anfitrión | Eliminar un alojamiento propio |
-| GET | `/alojamientos/mis-publicaciones` | Anfitrión | Listar alojamientos propios |
-| GET | `/alojamientos/{id}/tarifas` | Anfitrión | Listar tarifas por temporada |
-| POST | `/alojamientos/{id}/tarifas` | Anfitrión | Crear tarifa por temporada |
-| POST | `/reservas` | Huésped | Crear y confirmar una reserva |
-| POST | `/reservas/{id}/cancelar` | Huésped | Cancelar una reserva propia |
-| GET | `/reservas/mias` | Huésped | Listar reservas propias |
-| GET | `/reservas/mis-alojamientos` | Anfitrión | Reservas de las propiedades del anfitrión |
-| GET | `/reservas/admin` | Administrador | Listar todas las reservas |
-| GET | `/reservas/{id}` | Autenticado | Detalle de una reserva |
-| POST | `/pago` | Huésped | Registrar un pago o reembolso sobre una reserva |
-| POST | `/resenas` | Huésped | Reseñar una estadía completada |
-| GET | `/resenas/misresenas` | Huésped | Listar reseñas propias |
-| DELETE | `/resenas/{id}` | Huésped | Eliminar una reseña propia |
-| PATCH | `/resenas/admin/{id}/ocultar` | Administrador | Ocultar una reseña |
-| PATCH | `/resenas/admin/{id}/mostrar` | Administrador | Volver a mostrar una reseña |
-| GET | `/ciudades`, `/tipos-alojamiento`, `/politicas-cancelacion` | Público | Listar catálogos |
-| POST / PUT / DELETE | `/ciudades`, `/tipos-alojamiento`, `/politicas-cancelacion` | Administrador | Crear, actualizar y eliminar catálogos |
-| GET | `/admin/estadisticas` | Administrador | Totales de usuarios, propiedades y reservas |
-| GET | `/admin/usuarios` | Administrador | Listar usuarios |
-| PUT | `/admin/usuarios/{id}/estado` | Administrador | Activar o desactivar un usuario |
-| GET | `/admin/propiedades` | Administrador | Listar todas las propiedades |
-| PATCH | `/admin/alojamientos/{id}/estado?estado=PUBLICADO` | Administrador | Moderar una publicación |
-| GET | `/admin/reportes/ocupacion-ingresos` | Administrador | Reporte de la vista materializada |
-| POST | `/admin/reportes/ocupacion-ingresos/refrescar` | Administrador | Refrescar la vista materializada |
+| Método              | Ruta                                                        | Acceso        | Descripción                                       |
+| ------------------- | ----------------------------------------------------------- | ------------- | ------------------------------------------------- |
+| POST                | `/auth/register`                                            | Público       | Registrar usuario                                 |
+| POST                | `/auth/login`                                               | Público       | Iniciar sesión y obtener JWT                      |
+| GET                 | `/alojamientos`                                             | Público       | Listar alojamientos publicados                    |
+| GET                 | `/alojamientos/buscar`                                      | Público       | Buscar disponibles por ciudad, fechas y huéspedes |
+| GET                 | `/alojamientos/{id}/resenas`                                | Público       | Calificación promedio e historial de reseñas      |
+| GET                 | `/alojamientos/{id}/calendario`                             | Público       | Fechas bloqueadas del alojamiento                 |
+| POST                | `/alojamientos`                                             | Anfitrión     | Crear alojamiento (queda pendiente de aprobación) |
+| PUT                 | `/alojamientos/{id}`                                        | Anfitrión     | Actualizar un alojamiento propio                  |
+| DELETE              | `/alojamientos/{id}`                                        | Anfitrión     | Eliminar un alojamiento propio                    |
+| GET                 | `/alojamientos/mis-publicaciones`                           | Anfitrión     | Listar alojamientos propios                       |
+| GET                 | `/alojamientos/{id}/tarifas`                                | Anfitrión     | Listar tarifas por temporada                      |
+| POST                | `/alojamientos/{id}/tarifas`                                | Anfitrión     | Crear tarifa por temporada                        |
+| POST                | `/reservas`                                                 | Huésped       | Crear y confirmar una reserva                     |
+| POST                | `/reservas/{id}/cancelar`                                   | Huésped       | Cancelar una reserva propia                       |
+| GET                 | `/reservas/mias`                                            | Huésped       | Listar reservas propias                           |
+| GET                 | `/reservas/mis-alojamientos`                                | Anfitrión     | Reservas de las propiedades del anfitrión         |
+| GET                 | `/reservas/admin`                                           | Administrador | Listar todas las reservas                         |
+| GET                 | `/reservas/{id}`                                            | Autenticado   | Detalle de una reserva                            |
+| POST                | `/pago`                                                     | Huésped       | Registrar un pago o reembolso sobre una reserva   |
+| POST                | `/resenas`                                                  | Huésped       | Reseñar una estadía completada                    |
+| GET                 | `/resenas/misresenas`                                       | Huésped       | Listar reseñas propias                            |
+| DELETE              | `/resenas/{id}`                                             | Huésped       | Eliminar una reseña propia                        |
+| PATCH               | `/resenas/admin/{id}/ocultar`                               | Administrador | Ocultar una reseña                                |
+| PATCH               | `/resenas/admin/{id}/mostrar`                               | Administrador | Volver a mostrar una reseña                       |
+| GET                 | `/ciudades`, `/tipos-alojamiento`, `/politicas-cancelacion` | Público       | Listar catálogos                                  |
+| POST / PUT / DELETE | `/ciudades`, `/tipos-alojamiento`, `/politicas-cancelacion` | Administrador | Crear, actualizar y eliminar catálogos            |
+| GET                 | `/admin/estadisticas`                                       | Administrador | Totales de usuarios, propiedades y reservas       |
+| GET                 | `/admin/usuarios`                                           | Administrador | Listar usuarios                                   |
+| PUT                 | `/admin/usuarios/{id}/estado`                               | Administrador | Activar o desactivar un usuario                   |
+| GET                 | `/admin/propiedades`                                        | Administrador | Listar todas las propiedades                      |
+| PATCH               | `/admin/alojamientos/{id}/estado?estado=PUBLICADO`          | Administrador | Moderar una publicación                           |
+| GET                 | `/admin/reportes/ocupacion-ingresos`                        | Administrador | Reporte de la vista materializada                 |
+| POST                | `/admin/reportes/ocupacion-ingresos/refrescar`              | Administrador | Refrescar la vista materializada                  |
 
 Al crear una reserva, `sp_confirmar_reserva` registra automáticamente su pago, y `sp_cancelar_reserva` registra el reembolso al cancelar. El endpoint `POST /pago` permite registrar un movimiento adicional de forma manual.
 
@@ -316,7 +316,7 @@ Respuesta `200`:
     "politicaId": 1,
     "titulo": "Depto moderno en Providencia",
     "capacidadMax": 4,
-    "precioBaseNoche": 45000.00,
+    "precioBaseNoche": 45000.0,
     "estadiaMinima": 1,
     "estadoPublicacion": "PUBLICADO"
   }
@@ -378,7 +378,7 @@ Respuesta `201`:
   "fechaCheckin": "2027-01-10",
   "fechaCheckout": "2027-01-13",
   "numHuespedes": 2,
-  "total": 135000.00,
+  "total": 135000.0,
   "estado": "CONFIRMADA"
 }
 ```
@@ -394,7 +394,7 @@ Respuesta `200`:
 ```json
 {
   "message": "Reserva cancelada correctamente. Reembolso: $135000.00",
-  "reembolso": 135000.00
+  "reembolso": 135000.0
 }
 ```
 
@@ -481,7 +481,7 @@ Respuesta `200`:
     "noches_ocupadas": 9,
     "noches_disponibles": 62,
     "porcentaje_ocupacion": 14.52,
-    "ingresos_netos": 405000.00
+    "ingresos_netos": 405000.0
   }
 ]
 ```
@@ -502,11 +502,11 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/reservas/mias
 
 El script `database/alojamientos_db.sql` carga datos de ejemplo: 9 usuarios, 8 alojamientos en 7 ciudades, 13 reservas, 14 pagos, 5 reseñas y 6 temporadas.
 
-| Rol | Correo |
-| --- | --- |
-| Administrador | `admin@alojamientos.cl` |
-| Anfitrión | `carolina@anfitrion.cl`, `rodrigo@anfitrion.cl`, `valentina@anfitrion.cl` |
-| Huésped | `matias@huesped.cl`, `camila@huesped.cl`, `diego@huesped.cl`, `francisca@huesped.cl`, `sebastian@huesped.cl` |
+| Rol           | Correo                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------ |
+| Administrador | `admin@alojamientos.cl`                                                                                      |
+| Anfitrión     | `carolina@anfitrion.cl`, `rodrigo@anfitrion.cl`, `valentina@anfitrion.cl`                                    |
+| Huésped       | `matias@huesped.cl`, `camila@huesped.cl`, `diego@huesped.cl`, `francisca@huesped.cl`, `sebastian@huesped.cl` |
 
 **Contraseña de todas las cuentas:** `COMPLETAR`
 
@@ -536,10 +536,10 @@ Casos cubiertos:
 
 Grupo 4 · Taller de Base de Datos 2-2026 · Profesor: Matías Calderón · Ayudante: Fernando Solís
 
-| Integrante | Rol |
-| --- | --- |
-| Nicolás Irribarra| Creador de la Base de Datos|
-| Kristian Camacho | |
-| Nicolás Meza     | Creador de la Base de Datos|
-| Diego Díaz       | Creador de la Base de Datos|
-| Sebastián Arévalo| Creador de la Base de Datos|
+| Integrante        | Rol                                                   |
+| ----------------- | ----------------------------------------------------- |
+| Nicolás Irribarra | Creador de la Base de Datos                           |
+| Kristian Camacho  | Creador de vistas, triggers y procedimientos de la BD |
+| Nicolás Meza      | Desarrollo Backend                                    |
+| Diego Díaz        | Desarrollo Frontend                                   |
+| Sebastián Arévalo | Desarrollo Backend                                    |
