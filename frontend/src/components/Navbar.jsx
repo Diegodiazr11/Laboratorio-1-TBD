@@ -74,7 +74,7 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center space-x-3 pl-3 sm:pl-4 border-l border-gray-200">
                 <span className="hidden md:inline text-gray-700">
-                  Hola, <strong className="font-semibold text-gray-900">{user.name || user.email}</strong>{' '}
+                  Hola, <strong className="font-semibold text-gray-700">{user.nombre}</strong>{' '}
                   <span className="text-[10px] bg-rose-100 text-rose-700 font-semibold px-2 py-0.5 rounded-full uppercase ml-1">
                     {userRole}
                   </span>

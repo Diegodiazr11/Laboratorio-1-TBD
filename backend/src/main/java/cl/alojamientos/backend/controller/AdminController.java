@@ -92,4 +92,12 @@ public class AdminController {
         alojamientoService.refreshOccupationReport();
         return ResponseEntity.ok(Map.of("mensaje", "Vista materializada actualizada correctamente"));
     }
+
+    @Scheduled(cron = "0 0 1 * * *")
+    public void completarReservasVencidas() {
+        int filas = jdbcTemplate.update(
+                "UPDATE reserva SET estado = 'COMPLETADA' " +
+                        "WHERE estado = 'CONFIRMADA' AND fecha_checkout < CURRENT_DATE");
+        System.out.println("Reservas completadas automáticamente: " + filas);
+    }
 }
