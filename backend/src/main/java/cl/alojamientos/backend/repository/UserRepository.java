@@ -58,4 +58,14 @@ public class UserRepository {
         String sql = "SELECT * FROM usuario";
         return jdbcTemplate.query(sql, userRowMapper);
     }
+
+    public int countAll() {
+        Integer total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM usuario", Integer.class);
+        return total != null ? total : 0;
+    }
+
+    public int updateEstado(Long id, String estado) {
+        String sql = "UPDATE usuario SET estado = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, estado, id);
+    }
 }

@@ -35,4 +35,13 @@ public class UserService {
     private UserResponseDTO aDTO(User u) {
         return new UserResponseDTO(u.getId(), u.getNombre(), u.getEmail(), u.getRol(), u.getEstado());
     }
+
+    public int contarUsuarios() {
+        return userRepository.countAll();
+    }
+
+    public void cambiarEstadoUsuario(Long id, String rawStatus) {
+        String estadoBd = "ACTIVO".equalsIgnoreCase(rawStatus) ? "ACTIVO" : "INACTIVO";
+        userRepository.updateEstado(id, estadoBd);
+    }
 }

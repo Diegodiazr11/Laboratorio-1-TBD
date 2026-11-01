@@ -67,4 +67,15 @@ public class ReservaRepository {
         String sql = "CALL public.sp_cancelar_reserva(?::integer, ?::integer, NULL)";
         return jdbcTemplate.queryForObject(sql, BigDecimal.class, reservaId, huespedId);
     }
+
+    public int countAll() {
+        Integer total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reserva", Integer.class);
+        return total != null ? total : 0;
+    }
+
+    public int completarReservasVencidas() {
+        String sql = "UPDATE reserva SET estado = 'COMPLETADA' " +
+                "WHERE estado = 'CONFIRMADA' AND fecha_checkout < CURRENT_DATE";
+        return jdbcTemplate.update(sql);
+    }
 }

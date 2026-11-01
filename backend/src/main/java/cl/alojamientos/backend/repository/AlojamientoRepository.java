@@ -134,5 +134,11 @@ public class AlojamientoRepository {
     public void refreshOccupationReport() {
         jdbcTemplate.execute("CALL public.sp_refrescar_dashboard()");
     }
+
+    public int countByEstado(String estado) {
+        String sql = "SELECT COUNT(*) FROM alojamiento WHERE estado_publicacion = ?";
+        Integer total = jdbcTemplate.queryForObject(sql, Integer.class, estado);
+        return total != null ? total : 0;
+    }
 }
 

@@ -3,9 +3,9 @@ package cl.alojamientos.backend.controller;
 import cl.alojamientos.backend.dto.UserResponseDTO;
 import cl.alojamientos.backend.models.Alojamiento;
 import cl.alojamientos.backend.service.AlojamientoService;
+import cl.alojamientos.backend.service.ReservaService;
 import cl.alojamientos.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,29 +18,26 @@ public class AdminController {
 
     private final AlojamientoService alojamientoService;
     private final UserService userService;
-    private final JdbcTemplate jdbcTemplate;
+    private final ReservaService reservaService;
 
-    public AdminController(AlojamientoService alojamientoService, UserService userService, JdbcTemplate jdbcTemplate) {
+    public AdminController(
+            AlojamientoService alojamientoService,
+            UserService userService,
+            ReservaService reservaService) {
         this.alojamientoService = alojamientoService;
         this.userService = userService;
-        this.jdbcTemplate = jdbcTemplate;
+        this.reservaService = reservaService;
     }
 
     @GetMapping("/estadisticas")
     public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
-        Integer totalUsers = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM usuario", Integer.class);
-        Integer totalProperties = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM alojamiento WHERE estado_publicacion = 'PUBLICADO'", Integer.class);
-        Integer pendingProperties = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM alojamiento WHERE estado_publicacion = 'PENDIENTE'", Integer.class);
-        Integer totalBookings = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reserva", Integer.class);
-
         return ResponseEntity.ok(Map.of(
-                "totalUsers", totalUsers != null ? totalUsers : 0,
-                "totalProperties", totalProperties != null ? totalProperties : 0,
-                "pendingProperties", pendingProperties != null ? pendingProperties : 0,
-                "totalBookings", totalBookings != null ? totalBookings : 0
+                "totalUsers", userService.contarUsuarios(),
+                "totalProperties", alojamientoService.contarPorEstado("PUBLICADO"),
+                "pendingProperties", alojamientoService.contarPorEstado("PENDIENTE"),
+                "totalBookings", reservaService.contarReservas()
         ));
     }
-
 
     @GetMapping("/usuarios")
     public ResponseEntity<List<UserResponseDTO>> listarUsuarios() {
@@ -48,10 +45,11 @@ public class AdminController {
     }
 
     @PutMapping("/usuarios/{id}/estado")
-    public ResponseEntity<Void> cambiarEstadoUsuario(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<Void> cambiarEstadoUsuario(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
         String rawStatus = body.getOrDefault("status", "ACTIVO");
-        String estadoBd = "ACTIVO".equalsIgnoreCase(rawStatus) ? "ACTIVO" : "INACTIVO";
-        jdbcTemplate.update("UPDATE usuario SET estado = ? WHERE id = ?", estadoBd, id);
+        userService.cambiarEstadoUsuario(id, rawStatus);
         return ResponseEntity.noContent().build();
     }
 
@@ -61,14 +59,11 @@ public class AdminController {
     }
 
     @PutMapping("/propiedades/{id}/estado")
-    public ResponseEntity<Void> moderarPropiedadDesdeDashboard(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<Void> moderarPropiedadDesdeDashboard(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
         String status = body.getOrDefault("status", "PENDIENTE");
-        String estadoBd = switch (status.toUpperCase()) {
-            case "APROBADA", "PUBLICADO" -> "PUBLICADO";
-            case "RECHAZADA", "SUSPENDIDO" -> "SUSPENDIDO";
-            default -> "PENDIENTE";
-        };
-        alojamientoService.changeState(id, estadoBd);
+        alojamientoService.moderarPropiedadDesdeDashboard(id, status);
         return ResponseEntity.noContent().build();
     }
 
@@ -81,7 +76,7 @@ public class AdminController {
     }
 
     @GetMapping("/reportes/ocupacion-ingresos")
-    public ResponseEntity<List<Map<String, Object>>> obtenerReporteOcupacion() {
+    public ResponseEntity<List> obtenerReporteOcupacion() {
         alojamientoService.refreshOccupationReport();
         return ResponseEntity.ok(alojamientoService.obtainOccupationReport());
     }
@@ -95,9 +90,7 @@ public class AdminController {
 
     @Scheduled(cron = "0 0 1 * * *")
     public void completarReservasVencidas() {
-        int filas = jdbcTemplate.update(
-                "UPDATE reserva SET estado = 'COMPLETADA' " +
-                        "WHERE estado = 'CONFIRMADA' AND fecha_checkout < CURRENT_DATE");
+        int filas = reservaService.completarReservasVencidas();
         System.out.println("Reservas completadas automáticamente: " + filas);
     }
 }

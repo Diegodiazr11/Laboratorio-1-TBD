@@ -96,4 +96,17 @@ public class AlojamientoService {
     public void refreshOccupationReport() {
         alojamientoRepository.refreshOccupationReport();
     }
+
+    public int contarPorEstado(String estado) {
+        return alojamientoRepository.countByEstado(estado);
+    }
+
+    public void moderarPropiedadDesdeDashboard(Long id, String status) {
+        String estadoBd = switch (status.toUpperCase()) {
+            case "APROBADA", "PUBLICADO" -> "PUBLICADO";
+            case "RECHAZADA", "SUSPENDIDO" -> "SUSPENDIDO";
+            default -> "PENDIENTE";
+        };
+        changeState(id, estadoBd);
+    }
 }

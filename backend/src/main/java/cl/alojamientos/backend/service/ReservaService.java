@@ -63,5 +63,11 @@ public class ReservaService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
     }
 
+    public int contarReservas() {
+        return reservaRepository.countAll();
+    }
 
+    public int completarReservasVencidas() {
+        return reservaRepository.completarReservasVencidas();
+    }
 }
